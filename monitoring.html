@@ -39,12 +39,12 @@
       <input type="password" id="password" autocomplete="current-password">
     </div>
 
-    <button class="btn btn-blue" id="btnLogin" onclick="loginAdmin()">
+    <button class="btn btn-blue" id="btnLogin" type="button" onclick="loginAdmin()">
       Login Monitoring
     </button>
   </div>
 
-  <div id="monitoringBox">
+  <div id="monitoringBox" style="display:none;">
     <div class="card">
       <h2>Monitoring Job Task</h2>
 
@@ -125,13 +125,8 @@
       </div>
 
       <div class="modal-actions">
-        <button type="button" class="btn btn-blue" id="btnSubmitDone" onclick="submitDone()">
-          Simpan Done
-        </button>
-
-        <button type="button" class="btn btn-gray" onclick="closeDoneModal()">
-          Batal
-        </button>
+        <button type="button" class="btn btn-blue" id="btnSubmitDone" onclick="submitDone()">Simpan Done</button>
+        <button type="button" class="btn btn-gray" onclick="closeDoneModal()">Batal</button>
       </div>
     </form>
   </div>
@@ -140,540 +135,299 @@
 <script src="script.js"></script>
 
 <script>
-  const loginBox = document.getElementById('loginBox');
-  const monitoringBox = document.getElementById('monitoringBox');
-  const btnLogoutTop = document.getElementById('btnLogoutTop');
-  const btnLogin = document.getElementById('btnLogin');
-  const tbody = document.getElementById('tbody');
-  const fltStatus = document.getElementById('fltStatus');
-  const fltDate = document.getElementById('fltDate');
-  const summaryEl = document.getElementById('summaryCards');
-  const paginationEl = document.getElementById('pagination');
-  const logEl = document.getElementById('activityLog');
-  const doneModal = document.getElementById('doneModal');
-  const doneForm = document.getElementById('doneForm');
-  const btnSubmitDone = document.getElementById('btnSubmitDone');
-
-  let currentPage = 1;
-  const rowsPerPage = 10;
-
-  function showMonitoring() {
-    loginBox.style.display = 'none';
-    monitoringBox.style.display = 'block';
-    btnLogoutTop.style.display = 'inline-flex';
-  }
-
-  function showLogin() {
-    loginBox.style.display = 'block';
-    monitoringBox.style.display = 'none';
-    btnLogoutTop.style.display = 'none';
-  }
-
-  async function loginAdmin() {
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
-
-    if (!username || !password) {
-      alert('Username dan password wajib diisi.');
-      return;
-    }
-
-    try {
-      showLoading(btnLogin, 'Memproses...');
-
-      const result = await api('login', {
-        username,
-        password
-      });
-
-      if (!result.success) {
-        alert(result.message || 'Login gagal.');
-        return;
-      }
-
-      saveToken(result.token);
-      showMonitoring();
-
-      currentPage = 1;
-      await loadAll();
-
-    } catch (err) {
-      alert('Login error: ' + err.message);
-    } finally {
-      hideLoading(btnLogin);
-    }
-  }
-
-  async function loadAll() {
-    await loadSummary();
-    await loadTable();
-    await loadLog();
-  }
-
-  async function loadSummary() {
-    const result = await api('getScheduleSummary');
-
-    if (!result.success) {
-      alert(result.message || 'Gagal memuat summary.');
-      logout();
-      return;
-    }
-
-    summaryEl.innerHTML = `
-      <div class="summary-box summary-progress">
-        On Progress
-        <span>${result.progress || 0}</span>
-      </div>
-      <div class="summary-box summary-pending">
-        Pending
-        <span>${result.pending || 0}</span>
-      </div>
-      <div class="summary-box summary-done">
-        Done
-        <span>${result.done || 0}</span>
-      </div>
-    `;
-  }
-
-  async function loadTable() {
-    const result = await api('getSchedulePage', {
-      page: currentPage,
-      pageSize: rowsPerPage,
-      filterStatus: fltStatus.value,
-      filterDate: fltDate.value
-    });
-
-    if (!result.success) {
-      alert(result.message || 'Gagal memuat data.');
-      logout();
-      return;
-    }
-
-    renderTable(result.rows || []);
-    renderPagination(result);
-  }
-
-  function renderPagination(result) {
-    const totalRows = result.totalRows || 0;
-    const totalPages = result.totalPages || 1;
-    const page = result.page || 1;
-    const pageSize = result.pageSize || rowsPerPage;
-
-    if (totalRows === 0) {
-      paginationEl.innerHTML = '';
-      return;
-    }
-
-    currentPage = page;
-
-    const from = ((page - 1) * pageSize) + 1;
-    const to = Math.min(page * pageSize, totalRows);
-
-    paginationEl.innerHTML = `
-      <div class="pagination-info">
-        Menampilkan ${from} - ${to} dari ${totalRows} data | Halaman ${page} dari ${totalPages}
-      </div>
-
-      <div class="pagination-actions">
-        <button class="btn-small btn-progress" onclick="prevPage()" ${page === 1 ? 'disabled' : ''}>
-          Prev
-        </button>
-
-        <button class="btn-small btn-done" onclick="nextPage(${totalPages})" ${page === totalPages ? 'disabled' : ''}>
-          Next
-        </button>
-      </div>
-    `;
-  }
-
-  function renderTable(data) {
-    tbody.innerHTML = '';
-
-    if (!data.length) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="13" style="text-align:center; padding:24px; color:#64748b;">
-            Tidak ada data yang sesuai filter.
-          </td>
-        </tr>
-      `;
-      return;
-    }
-
-    data.forEach(item => {
-      const r = item.values;
-      const tr = document.createElement('tr');
-
-      tr.classList.add('status-' + String(r[14]).replace(/\s/g, ''));
-
-      const fotoDone = r[20]
-        ? `<a href="${escapeHtml(r[20])}" target="_blank">Lihat</a>`
-        : '-';
-
-      const isDone = r[14] === 'Done';
-
-      const actionButtons = isDone
-        ? `<button class="btn-small btn-progress" onclick="updateStatusRow(${item.rowIndex}, 'On Progress')">Reopen</button>`
-        : `
-          <button class="btn-small btn-done" onclick="openDoneModal(${item.rowIndex})">Done</button>
-          <button class="btn-small btn-progress" onclick="updateStatusRow(${item.rowIndex}, 'On Progress')">Progress</button>
-        `;
-
-      tr.innerHTML = `
-        <td>${item.rowIndex - 1}</td>
-        <td>${escapeHtml(r[1])}</td>
-        <td>${escapeHtml(r[2])}</td>
-        <td>${escapeHtml(r[3])}</td>
-        <td><div class="cell-clamp" title="${escapeHtml(r[4])}">${escapeHtml(r[4])}</div></td>
-        <td>${statusBadge(r[14])}</td>
-        <td>${escapeHtml(r[16])}</td>
-        <td>${priorityBadge(r[17])}</td>
-        <td>${escapeHtml(r[19] || '-')}</td>
-        <td>${fotoDone}</td>
-        <td><div class="cell-clamp" title="${escapeHtml(r[21])}">${escapeHtml(r[21] || '-')}</div></td>
-        <td>${escapeHtml(r[22] || '-')}</td>
-        <td><div class="action-wrap">${actionButtons}</div></td>
-      `;
-
-      tbody.appendChild(tr);
-    });
-  }
-
-  async function updateStatusRow(rowIndex, status) {
-    const result = await api('updateStatus', {
-      rowIndex,
-      newStatus: status
-    });
-
-    if (!result.success) {
-      alert(result.message || 'Gagal update status.');
-      return;
-    }
-
-    await loadAll();
-  }
-
-  function openDoneModal(rowIndex) {
-    document.getElementById('doneRowIndex').value = rowIndex;
-    document.getElementById('donePhoto').value = '';
-    document.getElementById('doneNote').value = '';
-    document.getElementById('closedBy').value = '';
-    doneModal.style.display = 'block';
-  }
-
-  function closeDoneModal() {
-    doneModal.style.display = 'none';
-  }
-
-  async function submitDone() {
-    if (!doneForm.checkValidity()) {
-      doneForm.reportValidity();
-      return;
-    }
-
-    try {
-      showLoading(btnSubmitDone, 'Menyimpan...');
-
-      const file = document.getElementById('donePhoto').files[0];
-
-      const result = await api('completeRequest', {
-        rowIndex: document.getElementById('doneRowIndex').value,
-        donePhotoBase64: await fileToBase64(file),
-        donePhotoName: file ? file.name : '',
-        doneNote: document.getElementById('doneNote').value.trim(),
-        closedBy: document.getElementById('closedBy').value.trim()
-      });
-
-      if (!result.success) {
-        alert(result.message || 'Gagal menyimpan dokumentasi.');
-        return;
-      }
-
-      alert(result.message || 'Request berhasil diselesaikan.');
-      closeDoneModal();
-      await loadAll();
-
-    } catch (err) {
-      alert('Error: ' + err.message);
-    } finally {
-      hideLoading(btnSubmitDone);
-    }
-  }
-
-  async function loadLog() {
-    const result = await api('getActivityLog');
-
-    if (!result.success) {
-      logEl.innerHTML = 'Gagal memuat log.';
-      return;
-    }
-
-    const rows = result.rows || [];
-
-    if (!rows.length) {
-      logEl.innerHTML = 'Belum ada aktivitas.';
-      return;
-    }
-
-    logEl.innerHTML = rows.map(r => `
-      <div class="log-item">
-        <div class="log-time">${escapeHtml(r[0])}</div>
-        <div class="log-message">${escapeHtml(r[1])}</div>
-      </div>
-    `).join('');
-  }
-
-  function prevPage() {
-    if (currentPage > 1) {
-      currentPage--;
-      loadTable();
-    }
-  }
-
-  function nextPage(totalPages) {
-    if (currentPage < totalPages) {
-      currentPage++;
-      loadTable();
-    }
-  }
-
-  fltStatus.addEventListener('change', function() {
-    currentPage = 1;
-    loadTable();
-  });
-
-  fltDate.addEventListener('change', function() {
-    currentPage = 1;
-    loadTable();
-  });
-
-  document.getElementById('username').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') loginAdmin();
-  });
-
-  document.getElementById('password').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') loginAdmin();
-  });
-
-  if (getToken()) {
-    showMonitoring();
-    loadAll();
-  } else {
-    showLogin();
-  }
-</script>
-
-</body>
-</html>
-</div>
-
-<script src="script.js"></script>
-
-<script>
+const loginBox = document.getElementById('loginBox');
+const monitoringBox = document.getElementById('monitoringBox');
+const btnLogoutTop = document.getElementById('btnLogoutTop');
+const btnLogin = document.getElementById('btnLogin');
+const tbody = document.getElementById('tbody');
+const fltStatus = document.getElementById('fltStatus');
+const fltDate = document.getElementById('fltDate');
+const summaryEl = document.getElementById('summaryCards');
+const paginationEl = document.getElementById('pagination');
+const logEl = document.getElementById('activityLog');
+const doneModal = document.getElementById('doneModal');
+const doneForm = document.getElementById('doneForm');
+const btnSubmitDone = document.getElementById('btnSubmitDone');
 
 let currentPage = 1;
+const rowsPerPage = 10;
 
-async function login(){
+function showMonitoring() {
+  loginBox.style.display = 'none';
+  monitoringBox.style.display = 'block';
+  btnLogoutTop.style.display = 'inline-flex';
+}
 
-  const result = await api('login',{
-    username: document.getElementById('username').value,
-    password: document.getElementById('password').value
-  });
+function showLogin() {
+  loginBox.style.display = 'block';
+  monitoringBox.style.display = 'none';
+  btnLogoutTop.style.display = 'none';
+}
 
-  if(!result.success){
-    alert(result.message);
+async function loginAdmin() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+
+  if (!username || !password) {
+    alert('Username dan password wajib diisi.');
     return;
   }
 
-  saveToken(result.token);
+  try {
+    showLoading(btnLogin, 'Memproses...');
 
-  initMonitoring();
-}
+    const result = await api('login', {
+      username: username,
+      password: password
+    });
 
-async function initMonitoring(){
+    if (!result.success) {
+      alert(result.message || 'Login gagal.');
+      return;
+    }
 
-  const token = getToken();
+    saveToken(result.token);
+    showMonitoring();
 
-  if(!token){
-    document.getElementById('loginBox').style.display = 'block';
-    document.getElementById('monitoringBox').style.display = 'none';
-    return;
+    currentPage = 1;
+    await loadAll();
+
+  } catch (err) {
+    alert('Login error: ' + err.message);
+  } finally {
+    hideLoading(btnLogin);
   }
-
-  document.getElementById('loginBox').style.display = 'none';
-  document.getElementById('monitoringBox').style.display = 'block';
-
-  loadSummary();
-  loadTable();
-  loadLog();
 }
 
-async function loadSummary(){
+async function loadAll() {
+  await loadSummary();
+  await loadTable();
+  await loadLog();
+}
 
+async function loadSummary() {
   const result = await api('getScheduleSummary');
 
-  if(!result.success){
-    alert(result.message);
+  if (!result.success) {
+    alert(result.message || 'Gagal memuat summary.');
     logout();
     return;
   }
 
-  document.getElementById('summary').innerHTML = `
-    <div class="summary-box s1">
-      On Progress
-      <span>${result.progress}</span>
-    </div>
-
-    <div class="summary-box s2">
-      Pending
-      <span>${result.pending}</span>
-    </div>
-
-    <div class="summary-box s3">
-      Done
-      <span>${result.done}</span>
-    </div>
-  `;
+  summaryEl.innerHTML =
+    '<div class="summary-box summary-progress">On Progress<span>' + (result.progress || 0) + '</span></div>' +
+    '<div class="summary-box summary-pending">Pending<span>' + (result.pending || 0) + '</span></div>' +
+    '<div class="summary-box summary-done">Done<span>' + (result.done || 0) + '</span></div>';
 }
 
-async function loadTable(){
-
-  const result = await api('getSchedulePage',{
-    page:currentPage,
-    pageSize:10,
-    filterStatus:document.getElementById('fltStatus').value,
-    filterDate:document.getElementById('fltDate').value
+async function loadTable() {
+  const result = await api('getSchedulePage', {
+    page: currentPage,
+    pageSize: rowsPerPage,
+    filterStatus: fltStatus.value,
+    filterDate: fltDate.value
   });
 
-  if(!result.success){
-    alert(result.message);
+  if (!result.success) {
+    alert(result.message || 'Gagal memuat data.');
     logout();
     return;
   }
 
-  let html = '';
+  renderTable(result.rows || []);
+  renderPagination(result);
+}
 
-  result.rows.forEach(item=>{
+function renderPagination(result) {
+  const totalRows = result.totalRows || 0;
+  const totalPages = result.totalPages || 1;
+  const page = result.page || 1;
+  const pageSize = result.pageSize || rowsPerPage;
 
+  if (totalRows === 0) {
+    paginationEl.innerHTML = '';
+    return;
+  }
+
+  currentPage = page;
+
+  const from = ((page - 1) * pageSize) + 1;
+  const to = Math.min(page * pageSize, totalRows);
+
+  paginationEl.innerHTML =
+    '<div class="pagination-info">Menampilkan ' + from + ' - ' + to + ' dari ' + totalRows + ' data | Halaman ' + page + ' dari ' + totalPages + '</div>' +
+    '<div class="pagination-actions">' +
+      '<button class="btn-small btn-progress" onclick="prevPage()" ' + (page === 1 ? 'disabled' : '') + '>Prev</button>' +
+      '<button class="btn-small btn-done" onclick="nextPage(' + totalPages + ')" ' + (page === totalPages ? 'disabled' : '') + '>Next</button>' +
+    '</div>';
+}
+
+function renderTable(data) {
+  tbody.innerHTML = '';
+
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="13" style="text-align:center; padding:24px; color:#64748b;">Tidak ada data yang sesuai filter.</td></tr>';
+    return;
+  }
+
+  data.forEach(item => {
     const r = item.values;
+    const tr = document.createElement('tr');
 
-    html += `
-      <tr>
-        <td>${r[1]}</td>
-        <td>${r[2]}</td>
-        <td>${r[3]}</td>
-        <td>${r[4]}</td>
-        <td>${statusBadge(r[14])}</td>
-        <td>${r[16]}</td>
-        <td>${r[17]}</td>
-      </tr>
-    `;
+    tr.classList.add('status-' + String(r[14]).replace(/\s/g, ''));
+
+    const fotoDone = r[20]
+      ? '<a href="' + escapeHtml(r[20]) + '" target="_blank">Lihat</a>'
+      : '-';
+
+    const isDone = r[14] === 'Done';
+
+    const actionButtons = isDone
+      ? '<button class="btn-small btn-progress" onclick="updateStatusRow(' + item.rowIndex + ', \'On Progress\')">Reopen</button>'
+      : '<button class="btn-small btn-done" onclick="openDoneModal(' + item.rowIndex + ')">Done</button>' +
+        '<button class="btn-small btn-progress" onclick="updateStatusRow(' + item.rowIndex + ', \'On Progress\')">Progress</button>';
+
+    tr.innerHTML =
+      '<td>' + (item.rowIndex - 1) + '</td>' +
+      '<td>' + escapeHtml(r[1]) + '</td>' +
+      '<td>' + escapeHtml(r[2]) + '</td>' +
+      '<td>' + escapeHtml(r[3]) + '</td>' +
+      '<td><div class="cell-clamp" title="' + escapeHtml(r[4]) + '">' + escapeHtml(r[4]) + '</div></td>' +
+      '<td>' + statusBadge(r[14]) + '</td>' +
+      '<td>' + escapeHtml(r[16]) + '</td>' +
+      '<td>' + priorityBadge(r[17]) + '</td>' +
+      '<td>' + escapeHtml(r[19] || '-') + '</td>' +
+      '<td>' + fotoDone + '</td>' +
+      '<td><div class="cell-clamp" title="' + escapeHtml(r[21]) + '">' + escapeHtml(r[21] || '-') + '</div></td>' +
+      '<td>' + escapeHtml(r[22] || '-') + '</td>' +
+      '<td><div class="action-wrap">' + actionButtons + '</div></td>';
+
+    tbody.appendChild(tr);
   });
-
-  document.getElementById('tbody').innerHTML = html;
 }
 
-async function loadLog(){
+async function updateStatusRow(rowIndex, status) {
+  const result = await api('updateStatus', {
+    rowIndex: rowIndex,
+    newStatus: status
+  });
 
+  if (!result.success) {
+    alert(result.message || 'Gagal update status.');
+    return;
+  }
+
+  await loadAll();
+}
+
+function openDoneModal(rowIndex) {
+  document.getElementById('doneRowIndex').value = rowIndex;
+  document.getElementById('donePhoto').value = '';
+  document.getElementById('doneNote').value = '';
+  document.getElementById('closedBy').value = '';
+  doneModal.style.display = 'block';
+}
+
+function closeDoneModal() {
+  doneModal.style.display = 'none';
+}
+
+async function submitDone() {
+  if (!doneForm.checkValidity()) {
+    doneForm.reportValidity();
+    return;
+  }
+
+  try {
+    showLoading(btnSubmitDone, 'Menyimpan...');
+
+    const file = document.getElementById('donePhoto').files[0];
+
+    const result = await api('completeRequest', {
+      rowIndex: document.getElementById('doneRowIndex').value,
+      donePhotoBase64: await fileToBase64(file),
+      donePhotoName: file ? file.name : '',
+      doneNote: document.getElementById('doneNote').value.trim(),
+      closedBy: document.getElementById('closedBy').value.trim()
+    });
+
+    if (!result.success) {
+      alert(result.message || 'Gagal menyimpan dokumentasi.');
+      return;
+    }
+
+    alert(result.message || 'Request berhasil diselesaikan.');
+    closeDoneModal();
+    await loadAll();
+
+  } catch (err) {
+    alert('Error: ' + err.message);
+  } finally {
+    hideLoading(btnSubmitDone);
+  }
+}
+
+async function loadLog() {
   const result = await api('getActivityLog');
 
-  if(!result.success){
+  if (!result.success) {
+    logEl.innerHTML = 'Gagal memuat log.';
     return;
   }
 
-  let html = '';
+  const rows = result.rows || [];
 
-  result.rows.forEach(r=>{
+  if (!rows.length) {
+    logEl.innerHTML = 'Belum ada aktivitas.';
+    return;
+  }
 
-    html += `
-      <div class="log-item">
-        <div class="log-time">${r[0]}</div>
-        <div>${r[1]}</div>
-      </div>
-    `;
-  });
-
-  document.getElementById('activityLog').innerHTML = html;
+  logEl.innerHTML = rows.map(r => {
+    return '<div class="log-item">' +
+      '<div class="log-time">' + escapeHtml(r[0]) + '</div>' +
+      '<div class="log-message">' + escapeHtml(r[1]) + '</div>' +
+    '</div>';
+  }).join('');
 }
 
-document.getElementById('fltStatus')
-.addEventListener('change',()=>{
+function prevPage() {
+  if (currentPage > 1) {
+    currentPage--;
+    loadTable();
+  }
+}
+
+function nextPage(totalPages) {
+  if (currentPage < totalPages) {
+    currentPage++;
+    loadTable();
+  }
+}
+
+fltStatus.addEventListener('change', function() {
   currentPage = 1;
   loadTable();
 });
 
-document.getElementById('fltDate')
-.addEventListener('change',()=>{
+fltDate.addEventListener('change', function() {
   currentPage = 1;
   loadTable();
 });
 
-initMonitoring();
+document.getElementById('username').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') loginAdmin();
+});
 
-</script>
+document.getElementById('password').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') loginAdmin();
+});
 
-</body>
-</html>  const result = await api('getScheduleSummary');
-
-  if(!result.success){
-    alert(result.message);
-    logout();
-    return;
-  }
-
-  document.getElementById('summary').innerHTML = `
-    <div class="summary-box s1">
-      On Progress
-      <span>${result.progress}</span>
-    </div>
-
-    <div class="summary-box s2">
-      Pending
-      <span>${result.pending}</span>
-    </div>
-
-    <div class="summary-box s3">
-      Done
-      <span>${result.done}</span>
-    </div>
-  `;
+if (getToken()) {
+  showMonitoring();
+  loadAll();
+} else {
+  showLogin();
 }
-
-async function loadTable(){
-
-  const result = await api('getSchedulePage',{
-    page:1,
-    pageSize:10
-  });
-
-  if(!result.success){
-    alert(result.message);
-    logout();
-    return;
-  }
-
-  let html = '';
-
-  result.rows.forEach(item=>{
-
-    const r = item.values;
-
-    html += `
-      <tr>
-        <td>${r[1]}</td>
-        <td>${r[2]}</td>
-        <td>${r[3]}</td>
-        <td>${r[4]}</td>
-        <td>${statusBadge(r[14])}</td>
-      </tr>
-    `;
-  });
-
-  document.getElementById('tbody').innerHTML = html;
-}
-
-initMonitoring();
-
 </script>
 
 </body>
