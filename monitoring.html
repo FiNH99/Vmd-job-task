@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Monitoring</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+  <div id="loginBox" class="card login-box">
+
+    <h2>Admin Login</h2>
+
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+
+    <button onclick="login()">Login</button>
+
+  </div>
+
+  <div id="monitoringBox" style="display:none;">
+
+    <div class="topbar">
+
+      <h1>Monitoring</h1>
+
+      <div class="top-actions">
+        <a href="index.html">
+          <button>Input</button>
+        </a>
+
+        <button onclick="logout()">Logout</button>
+      </div>
+
+    </div>
+
+    <div class="summary" id="summary"></div>
+
+    <div class="card">
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>PIC</th>
+              <th>Section</th>
+              <th>Request</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody id="tbody"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+
+<script>
+
+async function login(){
+
+  const result = await api('login',{
+    username: document.getElementById('username').value,
+    password: document.getElementById('password').value
+  });
+
+  if(!result.success){
+    alert(result.message);
+    return;
+  }
+
+  saveToken(result.token);
+
+  initMonitoring();
+}
+
+async function initMonitoring(){
+
+  const token = getToken();
+
+  if(!token){
+    document.getElementById('loginBox').style.display = 'block';
+    document.getElementById('monitoringBox').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('loginBox').style.display = 'none';
+  document.getElementById('monitoringBox').style.display = 'block';
+
+  loadSummary();
+  loadTable();
+}
+
+async function loadSummary(){
+
+  const result = await api('getScheduleSummary');
+
+  if(!result.success){
+    alert(result.message);
+    logout();
+    return;
+  }
+
+  document.getElementById('summary').innerHTML = `
+    <div class="summary-box s1">
+      On Progress
+      <span>${result.progress}</span>
+    </div>
+
+    <div class="summary-box s2">
+      Pending
+      <span>${result.pending}</span>
+    </div>
+
+    <div class="summary-box s3">
+      Done
+      <span>${result.done}</span>
+    </div>
+  `;
+}
+
+async function loadTable(){
+
+  const result = await api('getSchedulePage',{
+    page:1,
+    pageSize:10
+  });
+
+  if(!result.success){
+    alert(result.message);
+    logout();
+    return;
+  }
+
+  let html = '';
+
+  result.rows.forEach(item=>{
+
+    const r = item.values;
+
+    html += `
+      <tr>
+        <td>${r[1]}</td>
+        <td>${r[2]}</td>
+        <td>${r[3]}</td>
+        <td>${r[4]}</td>
+        <td>${statusBadge(r[14])}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('tbody').innerHTML = html;
+}
+
+initMonitoring();
+
+</script>
+
+</body>
+</html>

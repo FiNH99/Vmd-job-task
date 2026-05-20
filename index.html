@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Input Request</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+  <div class="topbar">
+    <h1>Input Request</h1>
+
+    <div class="top-actions">
+      <a href="monitoring.html">
+        <button>Monitoring</button>
+      </a>
+    </div>
+  </div>
+
+  <div class="card">
+
+    <form id="requestForm">
+
+      <label>PIC Area</label>
+      <input type="text" id="picArea" required>
+
+      <label>Section</label>
+      <input type="text" id="dept" required>
+
+      <label>Jenis Request</label>
+      <input type="text" id="jenisRequest" required>
+
+      <label>Deskripsi Produk</label>
+      <textarea id="deskripsiProduk" required></textarea>
+
+      <label>Deskripsi Promo</label>
+      <textarea id="deskripsiPromo" required></textarea>
+
+      <label>Jenis Promo</label>
+      <select id="jenisPromo">
+        <option>Normal</option>
+        <option>Harga Coret</option>
+      </select>
+
+      <label>Periode Promo</label>
+      <input type="text" id="periodePromo" placeholder="01/05/2025 - 07/05/2025" required>
+
+      <label>Size POP</label>
+      <input type="text" id="sizePop" required>
+
+      <label>Qty</label>
+      <input type="number" id="qty" required>
+
+      <label>Harga Normal</label>
+      <input type="text" id="hargaNormal" required>
+
+      <label>Harga Coret</label>
+      <input type="text" id="hargaCoret">
+
+      <label>Catatan</label>
+      <textarea id="catatan"></textarea>
+
+      <label>Foto Area</label>
+      <input type="file" id="fotoArea">
+
+      <button type="submit">Submit Request</button>
+
+    </form>
+
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+
+<script>
+
+document.getElementById('requestForm')
+.addEventListener('submit', async function(e){
+
+  e.preventDefault();
+
+  try{
+
+    const file = document.getElementById('fotoArea').files[0];
+
+    let fotoBase64 = '';
+    let fotoName = '';
+
+    if(file){
+      fotoBase64 = await fileToBase64(file);
+      fotoName = file.name;
+    }
+
+    const result = await api('submitRequest',{
+      picArea: document.getElementById('picArea').value,
+      dept: document.getElementById('dept').value,
+      jenisRequest: document.getElementById('jenisRequest').value,
+      deskripsiProduk: document.getElementById('deskripsiProduk').value,
+      deskripsiPromo: document.getElementById('deskripsiPromo').value,
+      jenisPromo: document.getElementById('jenisPromo').value,
+      periodePromo: document.getElementById('periodePromo').value,
+      sizePop: document.getElementById('sizePop').value,
+      qty: document.getElementById('qty').value,
+      hargaNormal: document.getElementById('hargaNormal').value,
+      hargaCoret: document.getElementById('hargaCoret').value,
+      catatan: document.getElementById('catatan').value,
+      fotoAreaBase64: fotoBase64,
+      fotoAreaName: fotoName
+    });
+
+    if(!result.success){
+      alert(result.message);
+      return;
+    }
+
+    alert('Request berhasil disimpan.');
+
+    document.getElementById('requestForm').reset();
+
+  }catch(err){
+    alert(err.message);
+  }
+
+});
+
+</script>
+
+</body>
+</html>
