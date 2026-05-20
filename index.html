@@ -2,35 +2,29 @@
 <html>
 <head>
   <title>VMD ALS JOB TASK</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
 
+<body>
 <div class="container">
 
   <div class="top-header">
-
     <div>
       <h1>VMD ALS JOB TASK</h1>
-      <p>Input request pekerjaan VMD.</p>
+      <p>Form request pekerjaan VMD.</p>
     </div>
 
-    <div class="top-actions">
-      <a href="monitoring.html">
-        <button class="btn btn-primary">
-          Monitoring
-        </button>
-      </a>
+    <div class="header-actions">
+      <a class="header-btn light" href="index.html">Form Input</a>
+      <a class="header-btn light" href="monitoring.html">Buka Monitoring</a>
     </div>
-
   </div>
 
   <div class="card">
-
     <h2>Form Request</h2>
 
     <form id="requestForm">
-
       <div class="grid-2">
 
         <div class="form-group">
@@ -40,72 +34,196 @@
 
         <div class="form-group">
           <label>Section</label>
-          <input type="text" id="dept" required>
+          <select id="dept" required>
+            <option value="">-- pilih Section --</option>
+            <option value="Grocery">Grocery</option>
+            <option value="GMS">GMS</option>
+            <option value="HBC NF">HBC NF</option>
+            <option value="Produce">Produce</option>
+            <option value="Fish">Fish</option>
+            <option value="Meat">Meat</option>
+            <option value="DND">DND</option>
+            <option value="CCM">CCM</option>
+            <option value="MMD">MMD</option>
+            <option value="DELICA">DELICA</option>
+            <option value="SUSHI">SUSHI</option>
+            <option value="BAKERY">BAKERY</option>
+          </select>
         </div>
 
         <div class="form-group">
           <label>Jenis Request</label>
-          <input type="text" id="jenisRequest" required>
+          <input type="text" id="jenisRequest" placeholder="contoh: Header / Poster / Shelfstrip" required>
+        </div>
+
+        <div class="form-group">
+          <label>Deskripsi Promo</label>
+          <select id="deskripsiPromo" required>
+            <option value="">-- pilih --</option>
+            <option>Kantetsu / Aeon Recommend</option>
+            <option>Promo Flyer</option>
+            <option>Promotion Reguler</option>
+            <option>Member Only</option>
+            <option>New Product</option>
+            <option>Additional Promo</option>
+            <option>Exclusive</option>
+            <option>Normal</option>
+          </select>
         </div>
 
         <div class="form-group">
           <label>Jenis Promo</label>
-          <select id="jenisPromo">
-            <option>Normal</option>
+          <select id="jenisPromo" required>
+            <option value="">-- pilih --</option>
             <option>Harga Coret</option>
+            <option>Harga Normal</option>
+            <option>Buy 1 Get 1</option>
+            <option>Buy 2 Get 1</option>
+            <option>Buy 2 Lebih Murah</option>
+            <option>Gift With Purchase (GWP)</option>
+            <option>Purchase With Purchase (PWP)</option>
           </select>
         </div>
 
         <div class="form-group">
           <label>Periode Promo</label>
-          <input type="text" id="periodePromo" placeholder="01/05/2025 - 07/05/2025" required>
+          <input type="text" id="periodePromo" placeholder="contoh: 05/03/2026 - 18/03/2026" required>
+          <div class="hint">Format tanggal awal: DD/MM/YYYY.</div>
         </div>
 
         <div class="form-group">
           <label>Size POP</label>
-          <input type="text" id="sizePop" required>
+          <input type="text" id="sizePop" placeholder="A3 / Poster A1 / dsb" required>
         </div>
 
         <div class="form-group">
-          <label>Qty</label>
-          <input type="number" id="qty" required>
+          <label>Quantity POP</label>
+          <input type="number" id="qty" min="1" required>
         </div>
 
         <div class="form-group">
           <label>Harga Normal</label>
-          <input type="text" id="hargaNormal" required>
+          <input type="text" id="hargaNormal" placeholder="contoh: 60000" required>
         </div>
 
         <div class="form-group">
           <label>Harga Coret</label>
-          <input type="text" id="hargaCoret">
+          <input type="text" id="hargaCoret" placeholder="Wajib jika promo Harga Coret">
+          <div class="hint">Kosongkan jika bukan promo Harga Coret.</div>
+        </div>
+
+        <div class="form-group full">
+          <label>Deskripsi Produk</label>
+          <textarea id="deskripsiProduk" rows="3" required></textarea>
+        </div>
+
+        <div class="form-group full">
+          <label>Foto Area</label>
+          <input type="file" id="fotoArea" accept="image/*">
+          <div class="hint">Foto akan dikirim ke backend Apps Script dan disimpan ke Google Drive.</div>
         </div>
 
         <div class="form-group">
-          <label>Foto Area</label>
-          <input type="file" id="fotoArea">
+          <label>PIC VMD</label>
+          <input type="text" id="picVmd" placeholder="Jika kosong otomatis Team VMD">
+        </div>
+
+        <div class="form-group full">
+          <label>Catatan Tambahan</label>
+          <textarea id="catatan" rows="3" placeholder="Opsional"></textarea>
         </div>
 
       </div>
 
-      <div class="form-group">
-        <label>Deskripsi Produk</label>
-        <textarea id="deskripsiProduk" rows="3" required></textarea>
-      </div>
-
-      <div class="form-group">
-        <label>Deskripsi Promo</label>
-        <textarea id="deskripsiPromo" rows="3" required></textarea>
-      </div>
-
-      <div class="form-group">
-        <label>Catatan</label>
-        <textarea id="catatan" rows="3"></textarea>
-      </div>
-
-      <button class="btn btn-success" type="submit">
+      <button class="btn btn-blue" type="submit" id="btnSubmit">
         Submit Request
       </button>
+    </form>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+
+<script>
+  const form = document.getElementById('requestForm');
+  const btnSubmit = document.getElementById('btnSubmit');
+  const jenisPromo = document.getElementById('jenisPromo');
+  const hargaCoret = document.getElementById('hargaCoret');
+
+  jenisPromo.addEventListener('change', function() {
+    if (jenisPromo.value === 'Harga Coret') {
+      hargaCoret.required = true;
+      hargaCoret.style.backgroundColor = '#fff7ed';
+      hargaCoret.style.borderColor = '#fb923c';
+    } else {
+      hargaCoret.required = false;
+      hargaCoret.value = '';
+      hargaCoret.style.backgroundColor = '';
+      hargaCoret.style.borderColor = '';
+    }
+  });
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    try {
+      showLoading(btnSubmit, 'Menyimpan...');
+
+      const file = document.getElementById('fotoArea').files[0];
+
+      let fotoBase64 = '';
+      let fotoName = '';
+
+      if (file) {
+        fotoBase64 = await fileToBase64(file);
+        fotoName = file.name;
+      }
+
+      const result = await api('submitRequest', {
+        picArea: document.getElementById('picArea').value.trim(),
+        dept: document.getElementById('dept').value.trim(),
+        jenisRequest: document.getElementById('jenisRequest').value.trim(),
+        deskripsiProduk: document.getElementById('deskripsiProduk').value.trim(),
+        deskripsiPromo: document.getElementById('deskripsiPromo').value.trim(),
+        jenisPromo: document.getElementById('jenisPromo').value.trim(),
+        periodePromo: document.getElementById('periodePromo').value.trim(),
+        sizePop: document.getElementById('sizePop').value.trim(),
+        qty: document.getElementById('qty').value,
+        hargaNormal: document.getElementById('hargaNormal').value.trim(),
+        hargaCoret: document.getElementById('hargaCoret').value.trim(),
+        picVmd: document.getElementById('picVmd').value.trim(),
+        catatan: document.getElementById('catatan').value.trim(),
+        fotoAreaBase64: fotoBase64,
+        fotoAreaName: fotoName
+      });
+
+      if (!result.success) {
+        alert(result.message || 'Gagal menyimpan request.');
+        return;
+      }
+
+      alert(result.message || 'Request berhasil disimpan.');
+      form.reset();
+      hargaCoret.required = false;
+      hargaCoret.style.backgroundColor = '';
+      hargaCoret.style.borderColor = '';
+
+    } catch (err) {
+      alert('Error: ' + err.message);
+    } finally {
+      hideLoading(btnSubmit);
+    }
+  });
+</script>
+
+</body>
+</html>      </button>
 
     </form>
 
