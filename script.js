@@ -1,4 +1,4 @@
-const API_URL = https://script.google.com/macros/s/AKfycbygUuJmXcVU6ahLeBcSX-ZFoytE1pneaxZ2NJKH6mBQKCKgkc9uOaC1D8n1iyf5FwTR/exec ;
+const API_URL = 'https://script.google.com/macros/s/AKfycbygUuJmXcVU6ahLeBcSX-ZFoytE1pneaxZ2NJKH6mBQKCKgkc9uOaC1D8n1iyf5FwTR/exec';
 
 function saveToken(token){
   localStorage.setItem('ADMIN_TOKEN', token);
@@ -13,20 +13,24 @@ function logout(){
   window.location.href = 'monitoring.html';
 }
 
-async function api(action, data = {}){
+async function api(action, data = {}) {
 
-  const payload = {
-    action,
-    token: getToken(),
-    ...data
-  };
+  const formData = new URLSearchParams();
 
-  const res = await fetch(API_URL,{
-    method:'POST',
-    headers:{
-      'Content-Type':'application/json'
-    },
-    body:JSON.stringify(payload)
+  formData.append('action', action);
+  formData.append('token', getToken() || '');
+
+  Object.keys(data).forEach(key => {
+
+    if(data[key] !== undefined && data[key] !== null){
+      formData.append(key, data[key]);
+    }
+
+  });
+
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    body: formData
   });
 
   return await res.json();
@@ -60,5 +64,7 @@ function fileToBase64(file){
     reader.onerror = reject;
 
     reader.readAsDataURL(file);
+
   });
+
 }
