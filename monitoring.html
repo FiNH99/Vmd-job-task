@@ -10,27 +10,41 @@
 
   <div id="loginBox" class="card login-box">
 
-    <h2>Admin Login</h2>
+    <div class="login-title">
+      <h2>Admin Login</h2>
+      <p>Masuk untuk membuka monitoring.</p>
+    </div>
 
     <input type="text" id="username" placeholder="Username">
     <input type="password" id="password" placeholder="Password">
 
-    <button onclick="login()">Login</button>
+    <button class="btn btn-success" onclick="login()">
+      Login
+    </button>
 
   </div>
 
   <div id="monitoringBox" style="display:none;">
 
-    <div class="topbar">
+    <div class="top-header">
 
-      <h1>Monitoring</h1>
+      <div>
+        <h1>Monitoring Dashboard</h1>
+        <p>Monitoring pekerjaan dan progress request.</p>
+      </div>
 
       <div class="top-actions">
+
         <a href="index.html">
-          <button>Input</button>
+          <button class="btn btn-primary">
+            Input
+          </button>
         </a>
 
-        <button onclick="logout()">Logout</button>
+        <button class="btn btn-danger" onclick="logout()">
+          Logout
+        </button>
+
       </div>
 
     </div>
@@ -38,6 +52,25 @@
     <div class="summary" id="summary"></div>
 
     <div class="card">
+
+      <div class="filters">
+
+        <div>
+          <label>Filter Status</label>
+          <select id="fltStatus">
+            <option value="">Semua</option>
+            <option>On Progress</option>
+            <option>Pending</option>
+            <option>Done</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Filter Tanggal</label>
+          <input type="date" id="fltDate">
+        </div>
+
+      </div>
 
       <div class="table-wrap">
 
@@ -50,6 +83,8 @@
               <th>Section</th>
               <th>Request</th>
               <th>Status</th>
+              <th>Target</th>
+              <th>Prioritas</th>
             </tr>
           </thead>
 
@@ -61,6 +96,14 @@
 
     </div>
 
+    <div class="card">
+
+      <h3>Activity Log</h3>
+
+      <div id="activityLog"></div>
+
+    </div>
+
   </div>
 
 </div>
@@ -68,6 +111,8 @@
 <script src="script.js"></script>
 
 <script>
+
+let currentPage = 1;
 
 async function login(){
 
@@ -101,11 +146,115 @@ async function initMonitoring(){
 
   loadSummary();
   loadTable();
+  loadLog();
 }
 
 async function loadSummary(){
 
   const result = await api('getScheduleSummary');
+
+  if(!result.success){
+    alert(result.message);
+    logout();
+    return;
+  }
+
+  document.getElementById('summary').innerHTML = `
+    <div class="summary-box s1">
+      On Progress
+      <span>${result.progress}</span>
+    </div>
+
+    <div class="summary-box s2">
+      Pending
+      <span>${result.pending}</span>
+    </div>
+
+    <div class="summary-box s3">
+      Done
+      <span>${result.done}</span>
+    </div>
+  `;
+}
+
+async function loadTable(){
+
+  const result = await api('getSchedulePage',{
+    page:currentPage,
+    pageSize:10,
+    filterStatus:document.getElementById('fltStatus').value,
+    filterDate:document.getElementById('fltDate').value
+  });
+
+  if(!result.success){
+    alert(result.message);
+    logout();
+    return;
+  }
+
+  let html = '';
+
+  result.rows.forEach(item=>{
+
+    const r = item.values;
+
+    html += `
+      <tr>
+        <td>${r[1]}</td>
+        <td>${r[2]}</td>
+        <td>${r[3]}</td>
+        <td>${r[4]}</td>
+        <td>${statusBadge(r[14])}</td>
+        <td>${r[16]}</td>
+        <td>${r[17]}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('tbody').innerHTML = html;
+}
+
+async function loadLog(){
+
+  const result = await api('getActivityLog');
+
+  if(!result.success){
+    return;
+  }
+
+  let html = '';
+
+  result.rows.forEach(r=>{
+
+    html += `
+      <div class="log-item">
+        <div class="log-time">${r[0]}</div>
+        <div>${r[1]}</div>
+      </div>
+    `;
+  });
+
+  document.getElementById('activityLog').innerHTML = html;
+}
+
+document.getElementById('fltStatus')
+.addEventListener('change',()=>{
+  currentPage = 1;
+  loadTable();
+});
+
+document.getElementById('fltDate')
+.addEventListener('change',()=>{
+  currentPage = 1;
+  loadTable();
+});
+
+initMonitoring();
+
+</script>
+
+</body>
+</html>  const result = await api('getScheduleSummary');
 
   if(!result.success){
     alert(result.message);
