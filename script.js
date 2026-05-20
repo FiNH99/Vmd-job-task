@@ -1,4 +1,4 @@
-const API_URL = https://script.google.com/macros/s/AKfycbygUuJmXcVU6ahLeBcSX-ZFoytE1pneaxZ2NJKH6mBQKCKgkc9uOaC1D8n1iyf5FwTR/exec;
+const API_URL = https://script.google.com/macros/s/AKfycbygUuJmXcVU6ahLeBcSX-ZFoytE1pneaxZ2NJKH6mBQKCKgkc9uOaC1D8n1iyf5FwTR/exec ;
 
 function saveToken(token){
   localStorage.setItem('ADMIN_TOKEN', token);
