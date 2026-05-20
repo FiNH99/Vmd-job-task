@@ -1,4 +1,4 @@
-const API_URL = 'https://script.google.com/macros/s/AKfycbygUuJmXcVU6ahLeBcSX-ZFoytE1pneaxZ2NJKH6mBQKCKgkc9uOaC1D8n1iyf5FwTR/exec';';
+const API_URL = 'https://script.google.com/macros/s/AKfycbygUuJmXcVU6ahLeBcSX-ZFoytE1pneaxZ2NJKH6mBQKCKgkc9uOaC1D8n1iyf5FwTR/exec';
 
 function saveToken(token) {
   localStorage.setItem('ADMIN_TOKEN', token);
@@ -82,16 +82,15 @@ function fileToBase64(file) {
     }
 
     const reader = new FileReader();
-
     reader.onload = () => resolve(reader.result);
     reader.onerror = reject;
-
     reader.readAsDataURL(file);
   });
 }
 
 function showLoading(button, text = 'Memproses...') {
   if (!button) return;
+
   button.dataset.oldText = button.textContent;
   button.disabled = true;
   button.textContent = text;
@@ -99,6 +98,7 @@ function showLoading(button, text = 'Memproses...') {
 
 function hideLoading(button) {
   if (!button) return;
+
   button.disabled = false;
   button.textContent = button.dataset.oldText || 'Submit';
 }
