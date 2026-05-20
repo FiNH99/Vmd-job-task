@@ -1,70 +1,111 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Input Request</title>
+  <title>VMD ALS JOB TASK</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
 
-  <div class="topbar">
-    <h1>Input Request</h1>
+  <div class="top-header">
+
+    <div>
+      <h1>VMD ALS JOB TASK</h1>
+      <p>Input request pekerjaan VMD.</p>
+    </div>
 
     <div class="top-actions">
       <a href="monitoring.html">
-        <button>Monitoring</button>
+        <button class="btn btn-primary">
+          Monitoring
+        </button>
       </a>
     </div>
+
   </div>
 
   <div class="card">
 
+    <h2>Form Request</h2>
+
     <form id="requestForm">
 
-      <label>PIC Area</label>
-      <input type="text" id="picArea" required>
+      <div class="grid-2">
 
-      <label>Section</label>
-      <input type="text" id="dept" required>
+        <div class="form-group">
+          <label>PIC Area</label>
+          <input type="text" id="picArea" required>
+        </div>
 
-      <label>Jenis Request</label>
-      <input type="text" id="jenisRequest" required>
+        <div class="form-group">
+          <label>Section</label>
+          <input type="text" id="dept" required>
+        </div>
 
-      <label>Deskripsi Produk</label>
-      <textarea id="deskripsiProduk" required></textarea>
+        <div class="form-group">
+          <label>Jenis Request</label>
+          <input type="text" id="jenisRequest" required>
+        </div>
 
-      <label>Deskripsi Promo</label>
-      <textarea id="deskripsiPromo" required></textarea>
+        <div class="form-group">
+          <label>Jenis Promo</label>
+          <select id="jenisPromo">
+            <option>Normal</option>
+            <option>Harga Coret</option>
+          </select>
+        </div>
 
-      <label>Jenis Promo</label>
-      <select id="jenisPromo">
-        <option>Normal</option>
-        <option>Harga Coret</option>
-      </select>
+        <div class="form-group">
+          <label>Periode Promo</label>
+          <input type="text" id="periodePromo" placeholder="01/05/2025 - 07/05/2025" required>
+        </div>
 
-      <label>Periode Promo</label>
-      <input type="text" id="periodePromo" placeholder="01/05/2025 - 07/05/2025" required>
+        <div class="form-group">
+          <label>Size POP</label>
+          <input type="text" id="sizePop" required>
+        </div>
 
-      <label>Size POP</label>
-      <input type="text" id="sizePop" required>
+        <div class="form-group">
+          <label>Qty</label>
+          <input type="number" id="qty" required>
+        </div>
 
-      <label>Qty</label>
-      <input type="number" id="qty" required>
+        <div class="form-group">
+          <label>Harga Normal</label>
+          <input type="text" id="hargaNormal" required>
+        </div>
 
-      <label>Harga Normal</label>
-      <input type="text" id="hargaNormal" required>
+        <div class="form-group">
+          <label>Harga Coret</label>
+          <input type="text" id="hargaCoret">
+        </div>
 
-      <label>Harga Coret</label>
-      <input type="text" id="hargaCoret">
+        <div class="form-group">
+          <label>Foto Area</label>
+          <input type="file" id="fotoArea">
+        </div>
 
-      <label>Catatan</label>
-      <textarea id="catatan"></textarea>
+      </div>
 
-      <label>Foto Area</label>
-      <input type="file" id="fotoArea">
+      <div class="form-group">
+        <label>Deskripsi Produk</label>
+        <textarea id="deskripsiProduk" rows="3" required></textarea>
+      </div>
 
-      <button type="submit">Submit Request</button>
+      <div class="form-group">
+        <label>Deskripsi Promo</label>
+        <textarea id="deskripsiPromo" rows="3" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Catatan</label>
+        <textarea id="catatan" rows="3"></textarea>
+      </div>
+
+      <button class="btn btn-success" type="submit">
+        Submit Request
+      </button>
 
     </form>
 
@@ -106,6 +147,29 @@ document.getElementById('requestForm')
       hargaNormal: document.getElementById('hargaNormal').value,
       hargaCoret: document.getElementById('hargaCoret').value,
       catatan: document.getElementById('catatan').value,
+      fotoAreaBase64: fotoBase64,
+      fotoAreaName: fotoName
+    });
+
+    if(!result.success){
+      alert(result.message);
+      return;
+    }
+
+    alert('Request berhasil disimpan.');
+
+    document.getElementById('requestForm').reset();
+
+  }catch(err){
+    alert(err.message);
+  }
+
+});
+
+</script>
+
+</body>
+</html>      catatan: document.getElementById('catatan').value,
       fotoAreaBase64: fotoBase64,
       fotoAreaName: fotoName
     });
