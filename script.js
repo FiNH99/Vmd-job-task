@@ -1,5 +1,7 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbygUuJmXcVU6ahLeBcSX-ZFoytE1pneaxZ2NJKH6mBQKCKgkc9uOaC1D8n1iyf5FwTR/exec';
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
 function saveToken(token) {
   localStorage.setItem('ADMIN_TOKEN', token);
 }
@@ -25,12 +27,26 @@ async function api(action, data = {}) {
     }
   });
 
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    body: formData
-  });
+  let res;
 
-  return await res.json();
+  try {
+    res = await fetch(API_URL, {
+      method: 'POST',
+      body: formData
+    });
+  } catch (err) {
+    throw new Error('Tidak bisa terhubung ke server. Periksa koneksi internet.');
+  }
+
+  if (!res.ok) {
+    throw new Error('Server error: ' + res.status);
+  }
+
+  try {
+    return await res.json();
+  } catch (err) {
+    throw new Error('Response server tidak valid.');
+  }
 }
 
 function escapeHtml(value) {
@@ -74,6 +90,22 @@ function priorityBadge(priority) {
   return `<span class="badge badge-normal">${safe}</span>`;
 }
 
+function validateImageFile(file) {
+  if (!file) return true;
+
+  if (!file.type.startsWith('image/')) {
+    alert('File harus berupa gambar.');
+    return false;
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    alert('Ukuran file maksimal 5 MB.');
+    return false;
+  }
+
+  return true;
+}
+
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
     if (!file) {
@@ -81,9 +113,14 @@ function fileToBase64(file) {
       return;
     }
 
+    if (!validateImageFile(file)) {
+      reject(new Error('File tidak valid.'));
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
+    reader.onerror = () => reject(new Error('Gagal membaca file.'));
     reader.readAsDataURL(file);
   });
 }
