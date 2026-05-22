@@ -123,7 +123,7 @@
         <div class="form-group full">
           <label>Foto Area</label>
           <input type="file" id="fotoArea" accept="image/*">
-          <div class="hint">Foto akan dikirim ke backend Apps Script dan disimpan ke Google Drive.</div>
+          <div class="hint">Maksimal 5 MB. Foto akan disimpan ke Google Drive.</div>
         </div>
 
         <div class="form-group">
@@ -149,167 +149,90 @@
 <script src="script.js"></script>
 
 <script>
-  const form = document.getElementById('requestForm');
-  const btnSubmit = document.getElementById('btnSubmit');
-  const jenisPromo = document.getElementById('jenisPromo');
-  const hargaCoret = document.getElementById('hargaCoret');
+const form = document.getElementById('requestForm');
+const btnSubmit = document.getElementById('btnSubmit');
+const jenisPromo = document.getElementById('jenisPromo');
+const hargaCoret = document.getElementById('hargaCoret');
+const fotoArea = document.getElementById('fotoArea');
 
-  jenisPromo.addEventListener('change', function() {
-    if (jenisPromo.value === 'Harga Coret') {
-      hargaCoret.required = true;
-      hargaCoret.style.backgroundColor = '#fff7ed';
-      hargaCoret.style.borderColor = '#fb923c';
-    } else {
-      hargaCoret.required = false;
-      hargaCoret.value = '';
-      hargaCoret.style.backgroundColor = '';
-      hargaCoret.style.borderColor = '';
-    }
-  });
+jenisPromo.addEventListener('change', function() {
+  if (jenisPromo.value === 'Harga Coret') {
+    hargaCoret.required = true;
+    hargaCoret.style.backgroundColor = '#fff7ed';
+    hargaCoret.style.borderColor = '#fb923c';
+  } else {
+    hargaCoret.required = false;
+    hargaCoret.value = '';
+    hargaCoret.style.backgroundColor = '';
+    hargaCoret.style.borderColor = '';
+  }
+});
 
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
+fotoArea.addEventListener('change', function() {
+  const file = fotoArea.files[0];
 
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      return;
-    }
+  if (!validateImageFile(file)) {
+    fotoArea.value = '';
+  }
+});
 
-    try {
-      showLoading(btnSubmit, 'Menyimpan...');
-
-      const file = document.getElementById('fotoArea').files[0];
-
-      let fotoBase64 = '';
-      let fotoName = '';
-
-      if (file) {
-        fotoBase64 = await fileToBase64(file);
-        fotoName = file.name;
-      }
-
-      const result = await api('submitRequest', {
-        picArea: document.getElementById('picArea').value.trim(),
-        dept: document.getElementById('dept').value.trim(),
-        jenisRequest: document.getElementById('jenisRequest').value.trim(),
-        deskripsiProduk: document.getElementById('deskripsiProduk').value.trim(),
-        deskripsiPromo: document.getElementById('deskripsiPromo').value.trim(),
-        jenisPromo: document.getElementById('jenisPromo').value.trim(),
-        periodePromo: document.getElementById('periodePromo').value.trim(),
-        sizePop: document.getElementById('sizePop').value.trim(),
-        qty: document.getElementById('qty').value,
-        hargaNormal: document.getElementById('hargaNormal').value.trim(),
-        hargaCoret: document.getElementById('hargaCoret').value.trim(),
-        picVmd: document.getElementById('picVmd').value.trim(),
-        catatan: document.getElementById('catatan').value.trim(),
-        fotoAreaBase64: fotoBase64,
-        fotoAreaName: fotoName
-      });
-
-      if (!result.success) {
-        alert(result.message || 'Gagal menyimpan request.');
-        return;
-      }
-
-      alert(result.message || 'Request berhasil disimpan.');
-      form.reset();
-      hargaCoret.required = false;
-      hargaCoret.style.backgroundColor = '';
-      hargaCoret.style.borderColor = '';
-
-    } catch (err) {
-      alert('Error: ' + err.message);
-    } finally {
-      hideLoading(btnSubmit);
-    }
-  });
-</script>
-
-</body>
-</html>      </button>
-
-    </form>
-
-  </div>
-
-</div>
-
-<script src="script.js"></script>
-
-<script>
-
-document.getElementById('requestForm')
-.addEventListener('submit', async function(e){
-
+form.addEventListener('submit', async function(e) {
   e.preventDefault();
 
-  try{
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
 
-    const file = document.getElementById('fotoArea').files[0];
+  try {
+    showLoading(btnSubmit, 'Menyimpan...');
+
+    const file = fotoArea.files[0];
 
     let fotoBase64 = '';
     let fotoName = '';
 
-    if(file){
+    if (file) {
       fotoBase64 = await fileToBase64(file);
       fotoName = file.name;
     }
 
-    const result = await api('submitRequest',{
-      picArea: document.getElementById('picArea').value,
-      dept: document.getElementById('dept').value,
-      jenisRequest: document.getElementById('jenisRequest').value,
-      deskripsiProduk: document.getElementById('deskripsiProduk').value,
-      deskripsiPromo: document.getElementById('deskripsiPromo').value,
-      jenisPromo: document.getElementById('jenisPromo').value,
-      periodePromo: document.getElementById('periodePromo').value,
-      sizePop: document.getElementById('sizePop').value,
+    const result = await api('submitRequest', {
+      picArea: document.getElementById('picArea').value.trim(),
+      dept: document.getElementById('dept').value.trim(),
+      jenisRequest: document.getElementById('jenisRequest').value.trim(),
+      deskripsiProduk: document.getElementById('deskripsiProduk').value.trim(),
+      deskripsiPromo: document.getElementById('deskripsiPromo').value.trim(),
+      jenisPromo: document.getElementById('jenisPromo').value.trim(),
+      periodePromo: document.getElementById('periodePromo').value.trim(),
+      sizePop: document.getElementById('sizePop').value.trim(),
       qty: document.getElementById('qty').value,
-      hargaNormal: document.getElementById('hargaNormal').value,
-      hargaCoret: document.getElementById('hargaCoret').value,
-      catatan: document.getElementById('catatan').value,
+      hargaNormal: document.getElementById('hargaNormal').value.trim(),
+      hargaCoret: document.getElementById('hargaCoret').value.trim(),
+      picVmd: document.getElementById('picVmd').value.trim(),
+      catatan: document.getElementById('catatan').value.trim(),
       fotoAreaBase64: fotoBase64,
       fotoAreaName: fotoName
     });
 
-    if(!result.success){
-      alert(result.message);
+    if (!result.success) {
+      alert(result.message || 'Gagal menyimpan request.');
       return;
     }
 
-    alert('Request berhasil disimpan.');
+    alert(result.message || 'Request berhasil disimpan.');
+    form.reset();
 
-    document.getElementById('requestForm').reset();
+    hargaCoret.required = false;
+    hargaCoret.style.backgroundColor = '';
+    hargaCoret.style.borderColor = '';
 
-  }catch(err){
-    alert(err.message);
+  } catch (err) {
+    alert('Error: ' + err.message);
+  } finally {
+    hideLoading(btnSubmit);
   }
-
 });
-
-</script>
-
-</body>
-</html>      catatan: document.getElementById('catatan').value,
-      fotoAreaBase64: fotoBase64,
-      fotoAreaName: fotoName
-    });
-
-    if(!result.success){
-      alert(result.message);
-      return;
-    }
-
-    alert('Request berhasil disimpan.');
-
-    document.getElementById('requestForm').reset();
-
-  }catch(err){
-    alert(err.message);
-  }
-
-});
-
 </script>
 
 </body>
