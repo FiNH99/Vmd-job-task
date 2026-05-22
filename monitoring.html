@@ -112,6 +112,7 @@
       <div class="form-group">
         <label>Foto Bukti Selesai</label>
         <input type="file" id="donePhoto" accept="image/*" required>
+        <div class="hint">Maksimal 5 MB.</div>
       </div>
 
       <div class="form-group">
@@ -148,6 +149,7 @@ const logEl = document.getElementById('activityLog');
 const doneModal = document.getElementById('doneModal');
 const doneForm = document.getElementById('doneForm');
 const btnSubmitDone = document.getElementById('btnSubmitDone');
+const donePhoto = document.getElementById('donePhoto');
 
 let currentPage = 1;
 const rowsPerPage = 10;
@@ -274,10 +276,10 @@ function renderTable(data) {
     const r = item.values;
     const tr = document.createElement('tr');
 
-    tr.classList.add('status-' + String(r[14]).replace(/\s/g, ''));
+    tr.classList.add('status-' + String(r[14] || '').replace(/\s/g, ''));
 
     const fotoDone = r[20]
-      ? '<a href="' + escapeHtml(r[20]) + '" target="_blank">Lihat</a>'
+      ? '<a href="' + escapeHtml(r[20]) + '" target="_blank" rel="noopener noreferrer">Lihat</a>'
       : '-';
 
     const isDone = r[14] === 'Done';
@@ -307,6 +309,8 @@ function renderTable(data) {
 }
 
 async function updateStatusRow(rowIndex, status) {
+  if (!confirm('Ubah status menjadi ' + status + '?')) return;
+
   const result = await api('updateStatus', {
     rowIndex: rowIndex,
     newStatus: status
@@ -341,7 +345,11 @@ async function submitDone() {
   try {
     showLoading(btnSubmitDone, 'Menyimpan...');
 
-    const file = document.getElementById('donePhoto').files[0];
+    const file = donePhoto.files[0];
+
+    if (!validateImageFile(file)) {
+      return;
+    }
 
     const result = await api('completeRequest', {
       rowIndex: document.getElementById('doneRowIndex').value,
@@ -412,6 +420,14 @@ fltStatus.addEventListener('change', function() {
 fltDate.addEventListener('change', function() {
   currentPage = 1;
   loadTable();
+});
+
+donePhoto.addEventListener('change', function() {
+  const file = donePhoto.files[0];
+
+  if (!validateImageFile(file)) {
+    donePhoto.value = '';
+  }
 });
 
 document.getElementById('username').addEventListener('keydown', function(e) {
