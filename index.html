@@ -121,11 +121,28 @@
         </div>
 
         <div class="form-group full">
-          <label>Foto Area</label>
-          <input type="file" id="fotoArea" accept="image/*">
-          <div class="hint">Maksimal 5 MB. Foto akan disimpan ke Google Drive.</div>
-        </div>
+          <div class="form-group full">
+  <label>Foto Area</label>
 
+  <input type="file" id="fotoArea" accept="image/*">
+
+  <div class="hint">
+    Maksimal 5 MB. Foto akan disimpan ke Google Drive.
+  </div>
+
+  <div id="previewWrapper" class="preview-wrapper" style="display:none;">
+    <img id="previewImage" class="preview-image">
+
+    <div class="preview-info">
+      <div id="previewName"></div>
+      <div id="previewSize"></div>
+    </div>
+
+    <button type="button" class="btn btn-danger" id="btnRemovePreview">
+      Hapus Foto
+    </button>
+  </div>
+</div>
         <div class="form-group">
           <label>PIC VMD</label>
           <input type="text" id="picVmd" placeholder="Jika kosong otomatis Team VMD">
