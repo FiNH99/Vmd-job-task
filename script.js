@@ -1,6 +1,6 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbygUuJmXcVU6ahLeBcSX-ZFoytE1pneaxZ2NJKH6mBQKCKgkc9uOaC1D8n1iyf5FwTR/exec';
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 function saveToken(token) {
   localStorage.setItem('ADMIN_TOKEN', token);
@@ -35,7 +35,7 @@ async function api(action, data = {}) {
       body: formData
     });
   } catch (err) {
-    throw new Error('Tidak bisa terhubung ke server. Periksa koneksi internet.');
+    throw new Error('Tidak bisa terhubung ke server.');
   }
 
   if (!res.ok) {
@@ -56,38 +56,6 @@ function escapeHtml(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
-}
-
-function statusBadge(status) {
-  const safe = escapeHtml(status);
-
-  if (status === 'On Progress') {
-    return `<span class="badge badge-progress">${safe}</span>`;
-  }
-
-  if (status === 'Pending') {
-    return `<span class="badge badge-pending">${safe}</span>`;
-  }
-
-  if (status === 'Done') {
-    return `<span class="badge badge-done">${safe}</span>`;
-  }
-
-  return `<span class="badge">${safe}</span>`;
-}
-
-function priorityBadge(priority) {
-  const safe = escapeHtml(priority);
-
-  if (priority === 'Urgent') {
-    return `<span class="badge badge-urgent">${safe}</span>`;
-  }
-
-  if (priority === 'Low') {
-    return `<span class="badge badge-low">${safe}</span>`;
-  }
-
-  return `<span class="badge badge-normal">${safe}</span>`;
 }
 
 function validateImageFile(file) {
@@ -138,4 +106,36 @@ function hideLoading(button) {
 
   button.disabled = false;
   button.textContent = button.dataset.oldText || 'Submit';
+}
+
+function statusBadge(status) {
+  const safe = escapeHtml(status);
+
+  if (status === 'On Progress') {
+    return `<span class="badge badge-progress">${safe}</span>`;
+  }
+
+  if (status === 'Pending') {
+    return `<span class="badge badge-pending">${safe}</span>`;
+  }
+
+  if (status === 'Done') {
+    return `<span class="badge badge-done">${safe}</span>`;
+  }
+
+  return `<span class="badge">${safe}</span>`;
+}
+
+function priorityBadge(priority) {
+  const safe = escapeHtml(priority);
+
+  if (priority === 'Urgent') {
+    return `<span class="badge badge-urgent">${safe}</span>`;
+  }
+
+  if (priority === 'Low') {
+    return `<span class="badge badge-low">${safe}</span>`;
+  }
+
+  return `<span class="badge badge-normal">${safe}</span>`;
 }
