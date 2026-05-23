@@ -138,10 +138,3 @@ function priorityBadge(priority) {
 
   return `<span class="badge badge-normal">${safe}</span>`;
 }
-
-setInterval(function() {
-  if (!getToken()) {
-    alert('Sesi login habis. Silakan login ulang.');
-    logout();
-  }
-}, 10000);
