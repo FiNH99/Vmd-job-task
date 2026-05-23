@@ -2,19 +2,33 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbygUuJmXcVU6ahLeBcSX-ZF
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
+const LOGIN_EXPIRE_MS = 3 * 60 * 1000;
+
 function saveToken(token) {
   localStorage.setItem('ADMIN_TOKEN', token);
+  localStorage.setItem('ADMIN_LOGIN_TIME', String(Date.now()));
 }
 
 function getToken() {
-  return localStorage.getItem('ADMIN_TOKEN') || '';
+  const token = localStorage.getItem('ADMIN_TOKEN') || '';
+  const loginTime = Number(localStorage.getItem('ADMIN_LOGIN_TIME') || 0);
+
+  if (!token || !loginTime) return '';
+
+  if (Date.now() - loginTime > LOGIN_EXPIRE_MS) {
+    localStorage.removeItem('ADMIN_TOKEN');
+    localStorage.removeItem('ADMIN_LOGIN_TIME');
+    return '';
+  }
+
+  return token;
 }
 
 function logout() {
   localStorage.removeItem('ADMIN_TOKEN');
+  localStorage.removeItem('ADMIN_LOGIN_TIME');
   window.location.href = 'monitoring.html';
 }
-
 async function api(action, data = {}) {
   const formData = new URLSearchParams();
 
@@ -139,3 +153,10 @@ function priorityBadge(priority) {
 
   return `<span class="badge badge-normal">${safe}</span>`;
 }
+
+setInterval(function() {
+  if (!getToken()) {
+    alert('Sesi login habis. Silakan login ulang.');
+    logout();
+  }
+}, 10000);
