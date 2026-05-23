@@ -7,21 +7,47 @@
 </head>
 
 <body>
-<div class="container">
 
-  <div class="top-header">
-  <div>
-    <h1>VMD ALS JOB TASK</h1>
-    <p>Live monitoring pekerjaan, status, prioritas, dan dokumentasi selesai.</p>
-  </div>
+<div class="app-shell">
 
-  <div class="header-actions">
-    <a class="header-btn light" href="index.html">+ New Request</a>
-    <button class="header-btn danger" onclick="logout()" id="btnLogoutTop" style="display:none;">
-      Logout
-    </button>
-  </div>
-</div>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">V</div>
+      <div>
+        <h1>VMD ALS</h1>
+        <p>Operations Center</p>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <a class="nav-link" href="index.html">＋ New Request</a>
+      <a class="nav-link active" href="monitoring.html">▦ Monitoring</a>
+      <a class="nav-link" href="#activityLog">◎ Activity Log</a>
+      <a class="nav-link" href="#">◇ Analytics</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <strong>Admin Console</strong><br>
+      Monitor status, priority, progress, and documentation.
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="container">
+
+      <div class="top-header">
+        <div>
+          <h1>Operations Monitoring</h1>
+          <p>Live dashboard untuk pekerjaan VMD, SLA, prioritas, dan dokumentasi selesai.</p>
+        </div>
+
+        <div class="header-actions">
+          <a class="header-btn light" href="index.html">+ New Request</a>
+          <button class="header-btn danger" onclick="logout()" id="btnLogoutTop" style="display:none;">
+            Logout
+          </button>
+        </div>
+      </div>
 
   <div id="loginBox" class="card login-card">
     <div class="login-title">
@@ -98,7 +124,9 @@
   </div>
 
 </div>
-
+    </div>
+  </main>
+</div>
 <div id="doneModal" class="modal-overlay">
   <div class="modal-card">
     <h2>Dokumentasi Selesai</h2>
