@@ -20,12 +20,12 @@
     </div>
 
     <nav class="nav-menu">
-      <a class="nav-link" href="index.html">＋ New Request</a>
-      <a class="nav-link active" href="monitoring.html">▦ Monitoring</a>
-      <a class="nav-link" href="#activityLog">◎ Activity Log</a>
-      <a class="nav-link" href="#">◇ Analytics</a>
-    </nav>
+  <a class="nav-link" href="index.html">＋ New Request</a>
+  <a class="nav-link active" href="monitoring.html">▦ Monitoring</a>
 
+  <a class="nav-link admin-only" href="#activityLog" style="display:none;">◎ Activity Log</a>
+  <a class="nav-link admin-only" href="#" style="display:none;">◇ Analytics</a>
+</nav>
     <div class="sidebar-footer">
       <strong>Admin Console</strong><br>
       Monitor status, priority, progress, and documentation.
@@ -189,10 +189,14 @@ function showMonitoring() {
   btnLogoutTop.style.display = 'inline-flex';
 }
 
-function showLogin() {
-  loginBox.style.display = 'block';
-  monitoringBox.style.display = 'none';
-  btnLogoutTop.style.display = 'none';
+function showMonitoring() {
+  loginBox.style.display = 'none';
+  monitoringBox.style.display = 'block';
+  btnLogoutTop.style.display = 'inline-flex';
+
+  document.querySelectorAll('.admin-only').forEach(el => {
+    el.style.display = 'flex';
+  });
 }
 
 async function loginAdmin() {
