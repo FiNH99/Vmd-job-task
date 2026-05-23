@@ -511,6 +511,14 @@ if (getToken()) {
 } else {
   showLogin();
 }
+
+  setInterval(function() {
+  if (!getToken()) {
+    alert('Sesi login habis. Silakan login ulang.');
+    logout();
+  }
+}, 10000);
+
 </script>
 
 </body>
