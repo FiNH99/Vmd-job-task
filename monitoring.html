@@ -122,7 +122,34 @@
       <div id="activityLog">Memuat...</div>
     </div>
   </div>
+<h3 id="analyticsSection">Analytics</h3>
 
+<div class="analytics-grid">
+  <div class="analytics-card blue">
+    <span>Total Request</span>
+    <strong id="analyticsTotal">0</strong>
+  </div>
+
+  <div class="analytics-card green">
+    <span>Completion Rate</span>
+    <strong id="analyticsRate">0%</strong>
+  </div>
+
+  <div class="analytics-card purple">
+    <span>Most Active Section</span>
+    <strong id="analyticsTopSection">-</strong>
+  </div>
+</div>
+
+<div class="analytics-panel">
+  <h3>Section Breakdown</h3>
+  <div id="analyticsSections"></div>
+</div>
+
+<div class="analytics-panel">
+  <h3>Priority Breakdown</h3>
+  <div id="analyticsPriorities"></div>
+</div>
 </div>
     </div>
   </main>
@@ -246,8 +273,8 @@ async function loadAll() {
   await loadSummary();
   await loadTable();
   await loadLog();
+  await loadAnalytics();
 }
-
 async function loadSummary() {
   const result = await api('getScheduleSummary');
 
@@ -449,7 +476,43 @@ async function loadLog() {
     logEl.innerHTML = 'Gagal memuat log.';
     return;
   }
+async function loadAnalytics() {
+  const result = await api('getAnalytics');
 
+  if (!result.success) {
+    return;
+  }
+
+  document.getElementById('analyticsTotal').textContent = result.total || 0;
+  document.getElementById('analyticsRate').textContent = (result.completionRate || 0) + '%';
+  document.getElementById('analyticsTopSection').textContent = result.mostActiveSection || '-';
+
+  renderAnalyticsBars('analyticsSections', result.sections || []);
+  renderAnalyticsBars('analyticsPriorities', result.priorities || []);
+}
+
+function renderAnalyticsBars(containerId, data) {
+  const el = document.getElementById(containerId);
+
+  if (!el) return;
+
+  if (!data.length) {
+    el.innerHTML = '<div class="analytics-empty">Belum ada data.</div>';
+    return;
+  }
+
+  el.innerHTML = data.map(item => {
+    return '<div class="analytics-row">' +
+      '<div class="analytics-row-head">' +
+        '<span>' + escapeHtml(item.name) + '</span>' +
+        '<strong>' + escapeHtml(item.count) + '</strong>' +
+      '</div>' +
+      '<div class="analytics-bar">' +
+        '<div style="width:' + Number(item.percent || 0) + '%"></div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
   const rows = result.rows || [];
 
   if (!rows.length) {
