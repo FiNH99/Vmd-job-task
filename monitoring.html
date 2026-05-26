@@ -20,12 +20,13 @@
     </div>
 
     <nav class="nav-menu">
-  <a class="nav-link" href="index.html">＋ New Request</a>
-  <a class="nav-link active" href="monitoring.html">▦ Monitoring</a>
+      <a class="nav-link" href="index.html">＋ New Request</a>
+      <a class="nav-link active" href="monitoring.html">▦ Monitoring</a>
 
-  <a class="nav-link admin-only" href="#activityLog" style="display:none;">◎ Activity Log</a>
-  <a class="nav-link admin-only" href="#" style="display:none;">◇ Analytics</a>
-</nav>
+      <a class="nav-link admin-only" href="#activityLog" style="display:none;">◎ Activity Log</a>
+      <a class="nav-link admin-only" href="#analyticsSection" style="display:none;">◇ Analytics</a>
+    </nav>
+
     <div class="sidebar-footer">
       <strong>Admin Console</strong><br>
       Monitor status, priority, progress, and documentation.
@@ -49,111 +50,118 @@
         </div>
       </div>
 
-  <div id="loginBox" class="card login-card">
-    <div class="login-title">
-      <h2>Admin Login</h2>
-      <p>Masukkan username dan password untuk membuka monitoring.</p>
-    </div>
-
-    <div class="form-group">
-      <label>Username</label>
-      <input type="text" id="username" autocomplete="username">
-    </div>
-
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="password" autocomplete="current-password">
-    </div>
-
-    <button class="btn btn-blue" id="btnLogin" type="button" onclick="loginAdmin()">
-      Login Monitoring
-    </button>
-  </div>
-
-  <div id="monitoringBox" style="display:none;">
-    <div class="card">
-      <h2>Monitoring Job Task</h2>
-
-      <div id="summaryCards" class="summary"></div>
-
-      <div class="filters">
-        <div>
-          <label>Filter Status</label>
-          <select id="fltStatus">
-            <option value="">Semua</option>
-            <option>On Progress</option>
-            <option>Pending</option>
-            <option>Done</option>
-          </select>
+      <div id="loginBox" class="card login-card">
+        <div class="login-title">
+          <h2>Admin Login</h2>
+          <p>Masukkan username dan password untuk membuka monitoring.</p>
         </div>
 
-        <div>
-          <label>Filter Tanggal</label>
-          <input type="date" id="fltDate">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="username" autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" autocomplete="current-password">
+        </div>
+
+        <button class="btn btn-blue" id="btnLogin" type="button" onclick="loginAdmin()">
+          Login Monitoring
+        </button>
+      </div>
+
+      <div id="monitoringBox" style="display:none;">
+        <div class="card">
+          <h2>Monitoring Job Task</h2>
+
+          <div id="summaryCards" class="summary"></div>
+
+          <div class="filters">
+            <div>
+              <label>Filter Status</label>
+              <select id="fltStatus">
+                <option value="">Semua</option>
+                <option>On Progress</option>
+                <option>Pending</option>
+                <option>Done</option>
+              </select>
+            </div>
+
+            <div>
+              <label>Filter Tanggal</label>
+              <input type="date" id="fltDate">
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table id="tblSchedule">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Tanggal</th>
+                  <th>PIC</th>
+                  <th>Section</th>
+                  <th>Request</th>
+                  <th>Status</th>
+                  <th>Target</th>
+                  <th>Prioritas</th>
+                  <th>Tgl Selesai</th>
+                  <th>Bukti</th>
+                  <th>Catatan Selesai</th>
+                  <th>Closed By</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+
+          <div id="pagination" class="pagination"></div>
+
+          <h3>Log Aktivitas</h3>
+          <div id="activityLog">Memuat...</div>
+
+          <h3 id="analyticsSection">Analytics</h3>
+
+          <div class="analytics-grid">
+            <div class="analytics-card blue">
+              <span>Total Request</span>
+              <strong id="analyticsTotal">0</strong>
+            </div>
+
+            <div class="analytics-card green">
+              <span>Completion Rate</span>
+              <strong id="analyticsRate">0%</strong>
+            </div>
+
+            <div class="analytics-card purple">
+              <span>Most Active Section</span>
+              <strong id="analyticsTopSection">-</strong>
+            </div>
+          </div>
+
+          <div class="analytics-panel">
+            <h3>Section Breakdown</h3>
+            <div id="analyticsSections">
+              <div class="analytics-empty">Memuat data...</div>
+            </div>
+          </div>
+
+          <div class="analytics-panel">
+            <h3>Priority Breakdown</h3>
+            <div id="analyticsPriorities">
+              <div class="analytics-empty">Memuat data...</div>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <div class="table-wrap">
-        <table id="tblSchedule">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Tanggal</th>
-              <th>PIC</th>
-              <th>Section</th>
-              <th>Request</th>
-              <th>Status</th>
-              <th>Target</th>
-              <th>Prioritas</th>
-              <th>Tgl Selesai</th>
-              <th>Bukti</th>
-              <th>Catatan Selesai</th>
-              <th>Closed By</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
-
-      <div id="pagination" class="pagination"></div>
-
-      <h3>Log Aktivitas</h3>
-      <div id="activityLog">Memuat...</div>
-    </div>
-  </div>
-<h3 id="analyticsSection">Analytics</h3>
-
-<div class="analytics-grid">
-  <div class="analytics-card blue">
-    <span>Total Request</span>
-    <strong id="analyticsTotal">0</strong>
-  </div>
-
-  <div class="analytics-card green">
-    <span>Completion Rate</span>
-    <strong id="analyticsRate">0%</strong>
-  </div>
-
-  <div class="analytics-card purple">
-    <span>Most Active Section</span>
-    <strong id="analyticsTopSection">-</strong>
-  </div>
-</div>
-
-<div class="analytics-panel">
-  <h3>Section Breakdown</h3>
-  <div id="analyticsSections"></div>
-</div>
-
-<div class="analytics-panel">
-  <h3>Priority Breakdown</h3>
-  <div id="analyticsPriorities"></div>
-</div>
-</div>
     </div>
   </main>
 </div>
+
 <div id="doneModal" class="modal-overlay">
   <div class="modal-card">
     <h2>Dokumentasi Selesai</h2>
@@ -189,6 +197,7 @@
     </form>
   </div>
 </div>
+
 <script src="script.js"></script>
 
 <script>
@@ -214,17 +223,12 @@ function showMonitoring() {
   loginBox.style.display = 'none';
   monitoringBox.style.display = 'block';
   btnLogoutTop.style.display = 'inline-flex';
-}
-
-function showMonitoring() {
-  loginBox.style.display = 'none';
-  monitoringBox.style.display = 'block';
-  btnLogoutTop.style.display = 'inline-flex';
 
   document.querySelectorAll('.admin-only').forEach(el => {
     el.style.display = 'flex';
   });
 }
+
 function showLogin() {
   loginBox.style.display = 'block';
   monitoringBox.style.display = 'none';
@@ -234,6 +238,7 @@ function showLogin() {
     el.style.display = 'none';
   });
 }
+
 async function loginAdmin() {
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value.trim();
@@ -275,6 +280,7 @@ async function loadAll() {
   await loadLog();
   await loadAnalytics();
 }
+
 async function loadSummary() {
   const result = await api('getScheduleSummary');
 
@@ -403,7 +409,6 @@ function openDoneModal(rowIndex, hasOldPhoto) {
   document.getElementById('doneNote').value = '';
   document.getElementById('closedBy').value = '';
 
-  const donePhoto = document.getElementById('donePhoto');
   const doneModalInfo = document.getElementById('doneModalInfo');
   const donePhotoHint = document.getElementById('donePhotoHint');
 
@@ -433,7 +438,7 @@ async function submitDone() {
   try {
     showLoading(btnSubmitDone, 'Menyimpan...');
 
-    const file = document.getElementById('donePhoto').files[0];
+    const file = donePhoto.files[0];
     const hasOldPhoto = document.getElementById('hasOldDonePhoto').value === 'yes';
 
     if (!file && !hasOldPhoto) {
@@ -476,19 +481,45 @@ async function loadLog() {
     logEl.innerHTML = 'Gagal memuat log.';
     return;
   }
-async function loadAnalytics() {
-  const result = await api('getAnalytics');
 
-  if (!result.success) {
+  const rows = result.rows || [];
+
+  if (!rows.length) {
+    logEl.innerHTML = 'Belum ada aktivitas.';
     return;
   }
 
-  document.getElementById('analyticsTotal').textContent = result.total || 0;
-  document.getElementById('analyticsRate').textContent = (result.completionRate || 0) + '%';
-  document.getElementById('analyticsTopSection').textContent = result.mostActiveSection || '-';
+  logEl.innerHTML = rows.map(r => {
+    return '<div class="log-item">' +
+      '<div class="log-time">' + escapeHtml(r[0]) + '</div>' +
+      '<div class="log-message">' + escapeHtml(r[1]) + '</div>' +
+    '</div>';
+  }).join('');
+}
 
-  renderAnalyticsBars('analyticsSections', result.sections || []);
-  renderAnalyticsBars('analyticsPriorities', result.priorities || []);
+async function loadAnalytics() {
+  try {
+    const result = await api('getAnalytics');
+
+    console.log('ANALYTICS RESULT:', result);
+
+    if (!result.success) {
+      document.getElementById('analyticsSections').innerHTML =
+        '<div class="analytics-empty">' + escapeHtml(result.message || 'Gagal memuat analytics.') + '</div>';
+      return;
+    }
+
+    document.getElementById('analyticsTotal').textContent = result.total || 0;
+    document.getElementById('analyticsRate').textContent = (result.completionRate || 0) + '%';
+    document.getElementById('analyticsTopSection').textContent = result.mostActiveSection || '-';
+
+    renderAnalyticsBars('analyticsSections', result.sections || []);
+    renderAnalyticsBars('analyticsPriorities', result.priorities || []);
+
+  } catch (err) {
+    document.getElementById('analyticsSections').innerHTML =
+      '<div class="analytics-empty">Analytics error: ' + escapeHtml(err.message) + '</div>';
+  }
 }
 
 function renderAnalyticsBars(containerId, data) {
@@ -510,20 +541,6 @@ function renderAnalyticsBars(containerId, data) {
       '<div class="analytics-bar">' +
         '<div style="width:' + Number(item.percent || 0) + '%"></div>' +
       '</div>' +
-    '</div>';
-  }).join('');
-}
-  const rows = result.rows || [];
-
-  if (!rows.length) {
-    logEl.innerHTML = 'Belum ada aktivitas.';
-    return;
-  }
-
-  logEl.innerHTML = rows.map(r => {
-    return '<div class="log-item">' +
-      '<div class="log-time">' + escapeHtml(r[0]) + '</div>' +
-      '<div class="log-message">' + escapeHtml(r[1]) + '</div>' +
     '</div>';
   }).join('');
 }
@@ -574,14 +591,6 @@ if (getToken()) {
 } else {
   showLogin();
 }
-
-  setInterval(function() {
-  if (!getToken()) {
-    alert('Sesi login habis. Silakan login ulang.');
-    logout();
-  }
-}, 10000);
-
 </script>
 
 </body>
