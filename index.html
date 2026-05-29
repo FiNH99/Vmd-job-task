@@ -4,6 +4,7 @@
   <title>VMD ALS JOB TASK</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 
 <body>
@@ -116,7 +117,13 @@
 
         <div class="form-group">
           <label>Periode Promo</label>
-          <input type="text" id="periodePromo" placeholder="contoh: 05/03/2026 - 18/03/2026" required>
+          <input 
+            type="text" 
+            id="periodePromo" 
+            placeholder="Pilih periode promo" 
+            required 
+            readonly
+            >
           <div class="hint">Format tanggal awal: DD/MM/YYYY.</div>
         </div>
 
@@ -322,6 +329,16 @@ form.addEventListener('submit', async function(e) {
   }
 });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
+<script>
+flatpickr("#periodePromo", {
+  mode: "range",
+  dateFormat: "d/m/Y",
+  locale: {
+    rangeSeparator: " - "
+  }
+});
+</script>
 </body>
 </html>
