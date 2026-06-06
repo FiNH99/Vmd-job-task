@@ -279,11 +279,19 @@ async function loginAdmin() {
 
 async function loadAll() {
   await loadSummary();
-  await loadTable();
+
+  try {
+    await loadTable();
+  } catch (err) {
+    tbody.innerHTML =
+      '<tr><td colspan="14" style="text-align:center; padding:24px; color:#ef4444;">Error load table: ' +
+      escapeHtml(err.message) +
+      '</td></tr>';
+  }
+
   await loadLog();
   await loadAnalytics();
 }
-
 async function loadSummary() {
   const result = await api('getScheduleSummary');
 
@@ -307,9 +315,13 @@ async function loadTable() {
     filterDate: fltDate.value
   });
 
+  console.log('TABLE RESULT:', result);
+
   if (!result.success) {
-    alert(result.message || 'Gagal memuat data.');
-    logout();
+    tbody.innerHTML =
+      '<tr><td colspan="14" style="text-align:center; padding:24px; color:#ef4444;">' +
+      escapeHtml(result.message || 'Gagal memuat data.') +
+      '</td></tr>';
     return;
   }
 
@@ -342,29 +354,16 @@ function renderPagination(result) {
 }
 
 function renderTable(data) {
-  tr.innerHTML =
-  '<td>' + (item.rowIndex - 1) + '</td>' +
-  '<td>' + escapeHtml(r[1]) + '</td>' +
-  '<td>' + escapeHtml(r[2]) + '</td>' +
-  '<td>' + escapeHtml(r[3]) + '</td>' +
-  '<td><div class="cell-clamp" title="' + escapeHtml(r[4]) + '">' + escapeHtml(r[4]) + '</div></td>' +
-  '<td><div class="cell-clamp" title="' + escapeHtml(r[5]) + '">' + escapeHtml(r[5]) + '</div></td>' +
-  '<td>' + statusBadge(r[14]) + '</td>' +
-  '<td>' + escapeHtml(r[16]) + '</td>' +
-  '<td>' + priorityBadge(r[17]) + '</td>' +
-  '<td>' + escapeHtml(r[19] || '-') + '</td>' +
-  '<td>' + fotoDone + '</td>' +
-  '<td><div class="cell-clamp" title="' + escapeHtml(r[21]) + '">' + escapeHtml(r[21] || '-') + '</div></td>' +
-  '<td>' + escapeHtml(r[22] || '-') + '</td>' +
-  '<td><div class="action-wrap">' + actionButtons + '</div></td>';
+  tbody.innerHTML = '';
 
   if (!data.length) {
-    tbody.innerHTML = '<tr><td colspan="14" style="text-align:center; padding:24px; color:#64748b;">Tidak ada data yang sesuai filter.</td></tr>';
+    tbody.innerHTML =
+      '<tr><td colspan="14" style="text-align:center; padding:24px; color:#64748b;">Tidak ada data yang sesuai filter.</td></tr>';
     return;
   }
 
   data.forEach(item => {
-    const r = item.values;
+    const r = item.values || [];
     const tr = document.createElement('tr');
 
     tr.classList.add('status-' + String(r[14] || '').replace(/\s/g, ''));
@@ -377,28 +376,28 @@ function renderTable(data) {
 
     const isDone = r[14] === 'Done';
     const hasDonePhoto = fotoDoneUrl ? 'true' : 'false';
-
     const detailData = encodeURIComponent(JSON.stringify(r));
 
     const actionButtons = isDone
-  ? '<button class="btn-small btn-detail" onclick="openDetailModal(\'' + detailData + '\')">Detail</button>' +
-    '<button class="btn-small btn-progress" onclick="updateStatusRow(' + item.rowIndex + ', \'On Progress\')">Reopen</button>'
-  : '<button class="btn-small btn-detail" onclick="openDetailModal(\'' + detailData + '\')">Detail</button>' +
-    '<button class="btn-small btn-done" onclick="openDoneModal(' + item.rowIndex + ', ' + hasDonePhoto + ')">Done</button>' +
-    '<button class="btn-small btn-progress" onclick="updateStatusRow(' + item.rowIndex + ', \'On Progress\')">Progress</button>';
-    
+      ? '<button class="btn-small btn-detail" onclick="openDetailModal(\'' + detailData + '\')">Detail</button>' +
+        '<button class="btn-small btn-progress" onclick="updateStatusRow(' + item.rowIndex + ', \'On Progress\')">Reopen</button>'
+      : '<button class="btn-small btn-detail" onclick="openDetailModal(\'' + detailData + '\')">Detail</button>' +
+        '<button class="btn-small btn-done" onclick="openDoneModal(' + item.rowIndex + ', ' + hasDonePhoto + ')">Done</button>' +
+        '<button class="btn-small btn-progress" onclick="updateStatusRow(' + item.rowIndex + ', \'On Progress\')">Progress</button>';
+
     tr.innerHTML =
-      '<td>' + (item.rowIndex - 1) + '</td>' +
-      '<td>' + escapeHtml(r[1]) + '</td>' +
-      '<td>' + escapeHtml(r[2]) + '</td>' +
-      '<td>' + escapeHtml(r[3]) + '</td>' +
-      '<td><div class="cell-clamp" title="' + escapeHtml(r[4]) + '">' + escapeHtml(r[4]) + '</div></td>' +
-      '<td>' + statusBadge(r[14]) + '</td>' +
-      '<td>' + escapeHtml(r[16]) + '</td>' +
-      '<td>' + priorityBadge(r[17]) + '</td>' +
+      '<td>' + escapeHtml(item.rowIndex - 1) + '</td>' +
+      '<td>' + escapeHtml(r[1] || '-') + '</td>' +
+      '<td>' + escapeHtml(r[2] || '-') + '</td>' +
+      '<td>' + escapeHtml(r[3] || '-') + '</td>' +
+      '<td><div class="cell-clamp" title="' + escapeHtml(r[4] || '-') + '">' + escapeHtml(r[4] || '-') + '</div></td>' +
+      '<td><div class="cell-clamp" title="' + escapeHtml(r[5] || '-') + '">' + escapeHtml(r[5] || '-') + '</div></td>' +
+      '<td>' + statusBadge(r[14] || '-') + '</td>' +
+      '<td>' + escapeHtml(r[16] || '-') + '</td>' +
+      '<td>' + priorityBadge(r[17] || '-') + '</td>' +
       '<td>' + escapeHtml(r[19] || '-') + '</td>' +
       '<td>' + fotoDone + '</td>' +
-      '<td><div class="cell-clamp" title="' + escapeHtml(r[21]) + '">' + escapeHtml(r[21] || '-') + '</div></td>' +
+      '<td><div class="cell-clamp" title="' + escapeHtml(r[21] || '-') + '">' + escapeHtml(r[21] || '-') + '</div></td>' +
       '<td>' + escapeHtml(r[22] || '-') + '</td>' +
       '<td><div class="action-wrap">' + actionButtons + '</div></td>';
 
