@@ -353,6 +353,361 @@ function renderPagination(result) {
     '</div>';
 }
 
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Monitoring VMD ALS JOB TASK</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">V</div>
+      <div>
+        <h1>VMD ALS</h1>
+        <p>Operations Center</p>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <a class="nav-link" href="index.html">＋ New Request</a>
+      <a class="nav-link active" href="monitoring.html">▦ Monitoring</a>
+
+      <a class="nav-link admin-only" href="#activityLog" style="display:none;">◎ Activity Log</a>
+      <a class="nav-link admin-only" href="#analyticsSection" style="display:none;">◇ Analytics</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <strong>Admin Console</strong><br>
+      Monitor status, priority, progress, and documentation.
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="container">
+
+      <div class="top-header">
+        <div>
+          <h1>Operations Monitoring</h1>
+          <p>Live dashboard untuk pekerjaan VMD, SLA, prioritas, dan dokumentasi selesai.</p>
+        </div>
+
+        <div class="header-actions">
+          <a class="header-btn light" href="index.html">+ New Request</a>
+          <button class="header-btn danger" onclick="logout()" id="btnLogoutTop" style="display:none;">
+            Logout
+          </button>
+        </div>
+      </div>
+
+      <div id="loginBox" class="card login-card">
+        <div class="login-title">
+          <h2>Admin Login</h2>
+          <p>Masukkan username dan password untuk membuka monitoring.</p>
+        </div>
+
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="username" autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" autocomplete="current-password">
+        </div>
+
+        <button class="btn btn-blue" id="btnLogin" type="button" onclick="loginAdmin()">
+          Login Monitoring
+        </button>
+      </div>
+
+      <div id="monitoringBox" style="display:none;">
+        <div class="card">
+          <h2>Monitoring Job Task</h2>
+
+          <div id="summaryCards" class="summary"></div>
+
+          <div class="filters">
+            <div>
+              <label>Filter Status</label>
+              <select id="fltStatus">
+                <option value="">Semua</option>
+                <option>On Progress</option>
+                <option>Pending</option>
+                <option>Done</option>
+              </select>
+            </div>
+
+            <div>
+              <label>Filter Tanggal</label>
+              <input type="date" id="fltDate">
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table id="tblSchedule">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Tanggal</th>
+                  <th>PIC</th>
+                  <th>Section</th>
+                  <th>Request</th>
+                  <th>Deskripsi Produk</th>
+                  <th>Status</th>
+                  <th>Target</th>
+                  <th>Prioritas</th>
+                  <th>Tgl Selesai</th>
+                  <th>Bukti</th>
+                  <th>Catatan Selesai</th>
+                  <th>Closed By</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+
+          <div id="pagination" class="pagination"></div>
+
+          <h3>Log Aktivitas</h3>
+          <div id="activityLog">Memuat...</div>
+
+          <h3 id="analyticsSection">Analytics</h3>
+
+          <div class="analytics-grid">
+            <div class="analytics-card blue">
+              <span>Total Request</span>
+              <strong id="analyticsTotal">0</strong>
+            </div>
+
+            <div class="analytics-card green">
+              <span>Completion Rate</span>
+              <strong id="analyticsRate">0%</strong>
+            </div>
+
+            <div class="analytics-card purple">
+              <span>Most Active Section</span>
+              <strong id="analyticsTopSection">-</strong>
+            </div>
+          </div>
+
+          <div class="analytics-panel">
+            <h3>Section Breakdown</h3>
+            <div id="analyticsSections">
+              <div class="analytics-empty">Memuat data...</div>
+            </div>
+          </div>
+
+          <div class="analytics-panel">
+            <h3>Priority Breakdown</h3>
+            <div id="analyticsPriorities">
+              <div class="analytics-empty">Memuat data...</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div id="doneModal" class="modal-overlay">
+  <div class="modal-card">
+    <h2>Dokumentasi Selesai</h2>
+
+    <p id="doneModalInfo" style="color:#64748b;font-size:13px;margin-top:-8px;">
+      Upload foto bukti dan isi catatan sebelum request diubah menjadi Done.
+    </p>
+
+    <form id="doneForm">
+      <input type="hidden" id="doneRowIndex">
+      <input type="hidden" id="hasOldDonePhoto">
+
+      <div class="form-group">
+        <label>Foto Bukti Selesai</label>
+        <input type="file" id="donePhoto" accept="image/*">
+        <div class="hint" id="donePhotoHint">Maksimal 5 MB.</div>
+      </div>
+
+      <div class="form-group">
+        <label>Catatan Selesai</label>
+        <textarea id="doneNote" rows="3" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Closed By</label>
+        <input type="text" id="closedBy" placeholder="Nama admin / PIC">
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-blue" id="btnSubmitDone" onclick="submitDone()">Simpan Done</button>
+        <button type="button" class="btn btn-gray" onclick="closeDoneModal()">Batal</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="script.js"></script>
+
+<script>
+const loginBox = document.getElementById('loginBox');
+const monitoringBox = document.getElementById('monitoringBox');
+const btnLogoutTop = document.getElementById('btnLogoutTop');
+const btnLogin = document.getElementById('btnLogin');
+const tbody = document.getElementById('tbody');
+const fltStatus = document.getElementById('fltStatus');
+const fltDate = document.getElementById('fltDate');
+const summaryEl = document.getElementById('summaryCards');
+const paginationEl = document.getElementById('pagination');
+const logEl = document.getElementById('activityLog');
+const doneModal = document.getElementById('doneModal');
+const doneForm = document.getElementById('doneForm');
+const btnSubmitDone = document.getElementById('btnSubmitDone');
+const donePhoto = document.getElementById('donePhoto');
+const detailModal = document.getElementById('detailModal');
+const detailContent = document.getElementById('detailContent');
+  
+let currentPage = 1;
+const rowsPerPage = 10;
+
+function showMonitoring() {
+  loginBox.style.display = 'none';
+  monitoringBox.style.display = 'block';
+  btnLogoutTop.style.display = 'inline-flex';
+
+  document.querySelectorAll('.admin-only').forEach(el => {
+    el.style.display = 'flex';
+  });
+}
+
+function showLogin() {
+  loginBox.style.display = 'block';
+  monitoringBox.style.display = 'none';
+  btnLogoutTop.style.display = 'none';
+
+  document.querySelectorAll('.admin-only').forEach(el => {
+    el.style.display = 'none';
+  });
+}
+
+async function loginAdmin() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+
+  if (!username || !password) {
+    alert('Username dan password wajib diisi.');
+    return;
+  }
+
+  try {
+    showLoading(btnLogin, 'Memproses...');
+
+    const result = await api('login', {
+      username: username,
+      password: password
+    });
+
+    if (!result.success) {
+      alert(result.message || 'Login gagal.');
+      return;
+    }
+
+    saveToken(result.token);
+    showMonitoring();
+
+    currentPage = 1;
+    await loadAll();
+
+  } catch (err) {
+    alert('Login error: ' + err.message);
+  } finally {
+    hideLoading(btnLogin);
+  }
+}
+
+async function loadAll() {
+  await loadSummary();
+
+  try {
+    await loadTable();
+  } catch (err) {
+    tbody.innerHTML =
+      '<tr><td colspan="14" style="text-align:center; padding:24px; color:#ef4444;">Error load table: ' +
+      escapeHtml(err.message) +
+      '</td></tr>';
+  }
+
+  await loadLog();
+  await loadAnalytics();
+}
+async function loadSummary() {
+  const result = await api('getScheduleSummary');
+
+  if (!result.success) {
+    alert(result.message || 'Gagal memuat summary.');
+    logout();
+    return;
+  }
+
+  summaryEl.innerHTML =
+    '<div class="summary-box summary-progress">On Progress<span>' + (result.progress || 0) + '</span></div>' +
+    '<div class="summary-box summary-pending">Pending<span>' + (result.pending || 0) + '</span></div>' +
+    '<div class="summary-box summary-done">Done<span>' + (result.done || 0) + '</span></div>';
+}
+
+async function loadTable() {
+  const result = await api('getSchedulePage', {
+    page: currentPage,
+    pageSize: rowsPerPage,
+    filterStatus: fltStatus.value,
+    filterDate: fltDate.value
+  });
+
+  console.log('TABLE RESULT:', result);
+
+  if (!result.success) {
+    tbody.innerHTML =
+      '<tr><td colspan="14" style="text-align:center; padding:24px; color:#ef4444;">' +
+      escapeHtml(result.message || 'Gagal memuat data.') +
+      '</td></tr>';
+    return;
+  }
+
+  renderTable(result.rows || []);
+  renderPagination(result);
+}
+
+function renderPagination(result) {
+  const totalRows = result.totalRows || 0;
+  const totalPages = result.totalPages || 1;
+  const page = result.page || 1;
+  const pageSize = result.pageSize || rowsPerPage;
+
+  if (totalRows === 0) {
+    paginationEl.innerHTML = '';
+    return;
+  }
+
+  currentPage = page;
+
+  const from = ((page - 1) * pageSize) + 1;
+  const to = Math.min(page * pageSize, totalRows);
+
+  paginationEl.innerHTML =
+    '<div class="pagination-info">Menampilkan ' + from + ' - ' + to + ' dari ' + totalRows + ' data | Halaman ' + page + ' dari ' + totalPages + '</div>' +
+    '<div class="pagination-actions">' +
+      '<button class="btn-small btn-progress" onclick="prevPage()" ' + (page === 1 ? 'disabled' : '') + '>Prev</button>' +
+      '<button class="btn-small btn-done" onclick="nextPage(' + totalPages + ')" ' + (page === totalPages ? 'disabled' : '') + '>Next</button>' +
+    '</div>';
+}
+
 function renderTable(data) {
   tbody.innerHTML = '';
 
@@ -405,6 +760,269 @@ function renderTable(data) {
   });
 }
 
+async function updateStatusRow(rowIndex, status) {
+  if (!confirm('Ubah status menjadi ' + status + '?')) return;
+
+  const result = await api('updateStatus', {
+    rowIndex: rowIndex,
+    newStatus: status
+  });
+
+  if (!result.success) {
+    alert(result.message || 'Gagal update status.');
+    return;
+  }
+
+  await loadAll();
+}
+
+function openDoneModal(rowIndex, hasOldPhoto) {
+  document.getElementById('doneRowIndex').value = rowIndex;
+  document.getElementById('hasOldDonePhoto').value = hasOldPhoto ? 'yes' : 'no';
+
+  document.getElementById('donePhoto').value = '';
+  document.getElementById('doneNote').value = '';
+  document.getElementById('closedBy').value = '';
+
+  const doneModalInfo = document.getElementById('doneModalInfo');
+  const donePhotoHint = document.getElementById('donePhotoHint');
+
+  if (hasOldPhoto) {
+    donePhoto.required = false;
+    doneModalInfo.textContent = 'Foto bukti lama sudah tersedia. Upload foto baru hanya jika ingin mengganti dokumentasi.';
+    donePhotoHint.textContent = 'Opsional. Kosongkan jika ingin memakai foto bukti lama.';
+  } else {
+    donePhoto.required = true;
+    doneModalInfo.textContent = 'Upload foto bukti dan isi catatan sebelum request diubah menjadi Done.';
+    donePhotoHint.textContent = 'Wajib upload foto. Maksimal 5 MB.';
+  }
+
+  doneModal.style.display = 'block';
+}
+
+function closeDoneModal() {
+  doneModal.style.display = 'none';
+}
+
+async function submitDone() {
+  if (!doneForm.checkValidity()) {
+    doneForm.reportValidity();
+    return;
+  }
+
+  try {
+    showLoading(btnSubmitDone, 'Menyimpan...');
+
+    const file = donePhoto.files[0];
+    const hasOldPhoto = document.getElementById('hasOldDonePhoto').value === 'yes';
+
+    if (!file && !hasOldPhoto) {
+      alert('Foto bukti selesai wajib diupload.');
+      return;
+    }
+
+    if (file && !validateImageFile(file)) {
+      return;
+    }
+
+    const result = await api('completeRequest', {
+      rowIndex: document.getElementById('doneRowIndex').value,
+      donePhotoBase64: file ? await fileToBase64(file) : '',
+      donePhotoName: file ? file.name : '',
+      doneNote: document.getElementById('doneNote').value.trim(),
+      closedBy: document.getElementById('closedBy').value.trim()
+    });
+
+    if (!result.success) {
+      alert(result.message || 'Gagal menyimpan dokumentasi.');
+      return;
+    }
+
+    alert(result.message || 'Request berhasil diselesaikan.');
+    closeDoneModal();
+    await loadAll();
+
+  } catch (err) {
+    alert('Error: ' + err.message);
+  } finally {
+    hideLoading(btnSubmitDone);
+  }
+}
+
+async function loadLog() {
+  const result = await api('getActivityLog');
+
+  if (!result.success) {
+    logEl.innerHTML = 'Gagal memuat log.';
+    return;
+  }
+
+  const rows = result.rows || [];
+
+  if (!rows.length) {
+    logEl.innerHTML = 'Belum ada aktivitas.';
+    return;
+  }
+
+  logEl.innerHTML = rows.map(r => {
+    return '<div class="log-item">' +
+      '<div class="log-time">' + escapeHtml(r[0]) + '</div>' +
+      '<div class="log-message">' + escapeHtml(r[1]) + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function loadAnalytics() {
+  try {
+    const result = await api('getAnalytics');
+
+    console.log('ANALYTICS RESULT:', result);
+
+    if (!result.success) {
+      document.getElementById('analyticsSections').innerHTML =
+        '<div class="analytics-empty">' + escapeHtml(result.message || 'Gagal memuat analytics.') + '</div>';
+      return;
+    }
+
+    document.getElementById('analyticsTotal').textContent = result.total || 0;
+    document.getElementById('analyticsRate').textContent = (result.completionRate || 0) + '%';
+    document.getElementById('analyticsTopSection').textContent = result.mostActiveSection || '-';
+
+    renderAnalyticsBars('analyticsSections', result.sections || []);
+    renderAnalyticsBars('analyticsPriorities', result.priorities || []);
+
+  } catch (err) {
+    document.getElementById('analyticsSections').innerHTML =
+      '<div class="analytics-empty">Analytics error: ' + escapeHtml(err.message) + '</div>';
+  }
+}
+
+function renderAnalyticsBars(containerId, data) {
+  const el = document.getElementById(containerId);
+
+  if (!el) return;
+
+  if (!data.length) {
+    el.innerHTML = '<div class="analytics-empty">Belum ada data.</div>';
+    return;
+  }
+
+  el.innerHTML = data.map(item => {
+    return '<div class="analytics-row">' +
+      '<div class="analytics-row-head">' +
+        '<span>' + escapeHtml(item.name) + '</span>' +
+        '<strong>' + escapeHtml(item.count) + '</strong>' +
+      '</div>' +
+      '<div class="analytics-bar">' +
+        '<div style="width:' + Number(item.percent || 0) + '%"></div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function prevPage() {
+  if (currentPage > 1) {
+    currentPage--;
+    loadTable();
+  }
+}
+
+function nextPage(totalPages) {
+  if (currentPage < totalPages) {
+    currentPage++;
+    loadTable();
+  }
+}
+
+fltStatus.addEventListener('change', function() {
+  currentPage = 1;
+  loadTable();
+});
+
+fltDate.addEventListener('change', function() {
+  currentPage = 1;
+  loadTable();
+});
+
+donePhoto.addEventListener('change', function() {
+  const file = donePhoto.files[0];
+
+  if (!validateImageFile(file)) {
+    donePhoto.value = '';
+  }
+});
+
+document.getElementById('username').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') loginAdmin();
+});
+
+document.getElementById('password').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') loginAdmin();
+});
+
+if (getToken()) {
+  showMonitoring();
+  loadAll();
+} else {
+  showLogin();
+}
+
+function openDetailModal(encodedData) {
+  const r = JSON.parse(decodeURIComponent(encodedData));
+
+  const fotoArea = r[13]
+    ? '<a href="' + escapeHtml(r[13]) + '" target="_blank" rel="noopener noreferrer">Lihat Foto Area</a>'
+    : '-';
+
+  const fotoDone = r[20]
+    ? '<a href="' + escapeHtml(r[20]) + '" target="_blank" rel="noopener noreferrer">Lihat Foto Bukti</a>'
+    : '-';
+
+  detailContent.innerHTML =
+    '<div class="detail-grid">' +
+      detailItem('Tanggal Request', r[1]) +
+      detailItem('PIC Area', r[2]) +
+      detailItem('Section', r[3]) +
+      detailItem('Jenis Request', r[4]) +
+      detailItem('Deskripsi Produk', r[5]) +
+      detailItem('Deskripsi Promo', r[6]) +
+      detailItem('Jenis Promo', r[7]) +
+      detailItem('Periode Promo', r[8]) +
+      detailItem('Size POP', r[9]) +
+      detailItem('Qty', r[10]) +
+      detailItem('Harga Normal', r[11]) +
+      detailItem('Harga Coret', r[12] || '-') +
+      detailItem('Foto Area', fotoArea, true) +
+      detailItem('Status', statusBadge(r[14]), true) +
+      detailItem('PIC VMD', r[15]) +
+      detailItem('Target Selesai', r[16]) +
+      detailItem('Prioritas', priorityBadge(r[17]), true) +
+      detailItem('Catatan Request', r[18] || '-') +
+      detailItem('Tanggal Selesai', r[19] || '-') +
+      detailItem('Foto Bukti Selesai', fotoDone, true) +
+      detailItem('Catatan Selesai', r[21] || '-') +
+      detailItem('Closed By', r[22] || '-') +
+    '</div>';
+
+  detailModal.style.display = 'block';
+}
+
+function detailItem(label, value, isHtml) {
+  return '<div class="detail-item">' +
+    '<span>' + escapeHtml(label) + '</span>' +
+    '<strong>' + (isHtml ? value : escapeHtml(value || '-')) + '</strong>' +
+  '</div>';
+}
+
+function closeDetailModal() {
+  detailModal.style.display = 'none';
+  detailContent.innerHTML = '';
+}  
+  
+</script>
+
+</body>
+</html>
 async function updateStatusRow(rowIndex, status) {
   if (!confirm('Ubah status menjadi ' + status + '?')) return;
 
