@@ -387,7 +387,7 @@ textarea {
 
 table {
   width: 100%;
-  min-width: 1380px;
+  min-width: 1650px;
   border-collapse: collapse;
   table-layout: fixed;
 }
@@ -448,7 +448,7 @@ tbody tr:hover td {
 
 #tblSchedule th:nth-child(6),
 #tblSchedule td:nth-child(6) {
-  width: 130px;
+  width: 260px;
 }
 
 #tblSchedule th:nth-child(7),
@@ -484,6 +484,11 @@ tbody tr:hover td {
 #tblSchedule th:nth-child(13),
 #tblSchedule td:nth-child(13) {
   width: 240px;
+}
+
+#tblSchedule th:nth-child(14),
+#tblSchedule td:nth-child(14) {
+  width: 180px;
 }
 
 .cell-clamp {
