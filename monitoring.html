@@ -216,7 +216,9 @@ const doneModal = document.getElementById('doneModal');
 const doneForm = document.getElementById('doneForm');
 const btnSubmitDone = document.getElementById('btnSubmitDone');
 const donePhoto = document.getElementById('donePhoto');
-
+const detailModal = document.getElementById('detailModal');
+const detailContent = document.getElementById('detailContent');
+  
 let currentPage = 1;
 const rowsPerPage = 10;
 
@@ -376,11 +378,15 @@ function renderTable(data) {
     const isDone = r[14] === 'Done';
     const hasDonePhoto = fotoDoneUrl ? 'true' : 'false';
 
-    const actionButtons = isDone
-      ? '<button class="btn-small btn-progress" onclick="updateStatusRow(' + item.rowIndex + ', \'On Progress\')">Reopen</button>'
-      : '<button class="btn-small btn-done" onclick="openDoneModal(' + item.rowIndex + ', ' + hasDonePhoto + ')">Done</button>' +
-        '<button class="btn-small btn-progress" onclick="updateStatusRow(' + item.rowIndex + ', \'On Progress\')">Progress</button>';
+    const detailData = encodeURIComponent(JSON.stringify(r));
 
+    const actionButtons = isDone
+  ? '<button class="btn-small btn-detail" onclick="openDetailModal(\'' + detailData + '\')">Detail</button>' +
+    '<button class="btn-small btn-progress" onclick="updateStatusRow(' + item.rowIndex + ', \'On Progress\')">Reopen</button>'
+  : '<button class="btn-small btn-detail" onclick="openDetailModal(\'' + detailData + '\')">Detail</button>' +
+    '<button class="btn-small btn-done" onclick="openDoneModal(' + item.rowIndex + ', ' + hasDonePhoto + ')">Done</button>' +
+    '<button class="btn-small btn-progress" onclick="updateStatusRow(' + item.rowIndex + ', \'On Progress\')">Progress</button>';
+    
     tr.innerHTML =
       '<td>' + (item.rowIndex - 1) + '</td>' +
       '<td>' + escapeHtml(r[1]) + '</td>' +
@@ -606,6 +612,59 @@ if (getToken()) {
 } else {
   showLogin();
 }
+
+function openDetailModal(encodedData) {
+  const r = JSON.parse(decodeURIComponent(encodedData));
+
+  const fotoArea = r[13]
+    ? '<a href="' + escapeHtml(r[13]) + '" target="_blank" rel="noopener noreferrer">Lihat Foto Area</a>'
+    : '-';
+
+  const fotoDone = r[20]
+    ? '<a href="' + escapeHtml(r[20]) + '" target="_blank" rel="noopener noreferrer">Lihat Foto Bukti</a>'
+    : '-';
+
+  detailContent.innerHTML =
+    '<div class="detail-grid">' +
+      detailItem('Tanggal Request', r[1]) +
+      detailItem('PIC Area', r[2]) +
+      detailItem('Section', r[3]) +
+      detailItem('Jenis Request', r[4]) +
+      detailItem('Deskripsi Produk', r[5]) +
+      detailItem('Deskripsi Promo', r[6]) +
+      detailItem('Jenis Promo', r[7]) +
+      detailItem('Periode Promo', r[8]) +
+      detailItem('Size POP', r[9]) +
+      detailItem('Qty', r[10]) +
+      detailItem('Harga Normal', r[11]) +
+      detailItem('Harga Coret', r[12] || '-') +
+      detailItem('Foto Area', fotoArea, true) +
+      detailItem('Status', statusBadge(r[14]), true) +
+      detailItem('PIC VMD', r[15]) +
+      detailItem('Target Selesai', r[16]) +
+      detailItem('Prioritas', priorityBadge(r[17]), true) +
+      detailItem('Catatan Request', r[18] || '-') +
+      detailItem('Tanggal Selesai', r[19] || '-') +
+      detailItem('Foto Bukti Selesai', fotoDone, true) +
+      detailItem('Catatan Selesai', r[21] || '-') +
+      detailItem('Closed By', r[22] || '-') +
+    '</div>';
+
+  detailModal.style.display = 'block';
+}
+
+function detailItem(label, value, isHtml) {
+  return '<div class="detail-item">' +
+    '<span>' + escapeHtml(label) + '</span>' +
+    '<strong>' + (isHtml ? value : escapeHtml(value || '-')) + '</strong>' +
+  '</div>';
+}
+
+function closeDetailModal() {
+  detailModal.style.display = 'none';
+  detailContent.innerHTML = '';
+}  
+  
 </script>
 
 </body>
