@@ -340,10 +340,24 @@ function renderPagination(result) {
 }
 
 function renderTable(data) {
-  tbody.innerHTML = '';
+  tr.innerHTML =
+  '<td>' + (item.rowIndex - 1) + '</td>' +
+  '<td>' + escapeHtml(r[1]) + '</td>' +
+  '<td>' + escapeHtml(r[2]) + '</td>' +
+  '<td>' + escapeHtml(r[3]) + '</td>' +
+  '<td><div class="cell-clamp" title="' + escapeHtml(r[4]) + '">' + escapeHtml(r[4]) + '</div></td>' +
+  '<td><div class="cell-clamp" title="' + escapeHtml(r[5]) + '">' + escapeHtml(r[5]) + '</div></td>' +
+  '<td>' + statusBadge(r[14]) + '</td>' +
+  '<td>' + escapeHtml(r[16]) + '</td>' +
+  '<td>' + priorityBadge(r[17]) + '</td>' +
+  '<td>' + escapeHtml(r[19] || '-') + '</td>' +
+  '<td>' + fotoDone + '</td>' +
+  '<td><div class="cell-clamp" title="' + escapeHtml(r[21]) + '">' + escapeHtml(r[21] || '-') + '</div></td>' +
+  '<td>' + escapeHtml(r[22] || '-') + '</td>' +
+  '<td><div class="action-wrap">' + actionButtons + '</div></td>';
 
   if (!data.length) {
-    tbody.innerHTML = '<tr><td colspan="13" style="text-align:center; padding:24px; color:#64748b;">Tidak ada data yang sesuai filter.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="14" style="text-align:center; padding:24px; color:#64748b;">Tidak ada data yang sesuai filter.</td></tr>';
     return;
   }
 
